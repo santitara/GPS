@@ -87,6 +87,10 @@
           <itemPath>../../../../framework/system/system.h</itemPath>
         </logicalFolder>
       </logicalFolder>
+      <logicalFolder name="f3" displayName="gps" projectFiles="true">
+        <itemPath>../src/gps/AT_comands.h</itemPath>
+        <itemPath>../src/gps/gps_config.h</itemPath>
+      </logicalFolder>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -196,6 +200,10 @@
             </logicalFolder>
           </logicalFolder>
         </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="f3" displayName="gps" projectFiles="true">
+        <itemPath>../src/gps/gps_config.c</itemPath>
+        <itemPath>../src/gps/gps_uart.c</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"

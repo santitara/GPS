@@ -31,6 +31,7 @@
 #include "time.h"
 #include "string.h"
 #include "libgeohash-master/geohash.h"
+#include "gps/gps_config.h"
 
  //****************************************************************************
  DRV_HANDLE flash_spi_handle;
@@ -39,12 +40,13 @@
  
  
 /* Application Data */ 
-APP_DATA appData;
+APP_DATA app_data_v;
 //*****************************************************************************
 
 void APP_Initialize ( void )
 {  
-    
+    gps_config_init_module ();
+    gps_config_ON_OFF_module(); 
 }
 /**********************************************************
  * Application tasks routine. This function implements the
@@ -52,7 +54,22 @@ void APP_Initialize ( void )
  ***********************************************************/
 void APP_Tasks ( void )
 {
-       
+    switch(app_data_v.state)
+    {
+        case CONFIG_AT_MODULE:
+            gps_config_at_module();
+        break;
+        case CONFIG_AT_GPRS:
+        break;
+        case CONFIG_AT_GPS:
+            
+        break;
+                    
+        default:
+            
+        break;
+    }
+   
 }
 
 

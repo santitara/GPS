@@ -63,6 +63,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <sys/attribs.h>
 #include "app.h"
 #include "system_definitions.h"
+#include "gps/gps_uart.h"
 
 //extern tick_scaler_sirena;
 // *****************************************************************************
@@ -98,18 +99,26 @@ void __ISR(_TIMER_4_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance0(void)          
 // ****************************************************************************
  void __ISR(_UART_2_VECTOR, ipl2AUTO) _IntHandlerDrvUsartInstance0(void)                //recibe y genera alertas por UART del modulo de comunicaciones
 {
-
+     uint8_t index = 0;
     if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_2_RECEIVE))
     {
         /* Make sure receive buffer has data availible */
         if (PLIB_USART_ReceiverDataIsAvailable(USART_ID_2))
         {
             /* Get the data from the buffer */
-            PLIB_USART_ReceiverByteReceive(USART_ID_2);    
-        }     
+            gps_uart_v.rx_buffer[index] = PLIB_USART_ReceiverByteReceive(USART_ID_2);
+            if(gps_uart_v.rx_buffer[index] == '\n')
+            {
+                gps_uart_v.flag_rx_end = 1;   
+            }
+            else
+            {
+                index++;
+            }
+            
+        }
         PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_2_RECEIVE);
     }
-
     else if (PLIB_INT_SourceFlagGet(INT_ID_0,INT_SOURCE_USART_2_TRANSMIT))
     {
         PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_USART_2_TRANSMIT);
