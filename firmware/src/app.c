@@ -40,7 +40,7 @@
  
  
 /* Application Data */ 
-APP_DATA app_data_v;
+APP_DATA appData;
 //*****************************************************************************
 
 void APP_Initialize ( void )
@@ -54,17 +54,23 @@ void APP_Initialize ( void )
  ***********************************************************/
 void APP_Tasks ( void )
 {
-    switch(app_data_v.state)
+    switch(appData.state)
     {
         case CONFIG_AT_MODULE:
-            gps_config_at_module();
-        break;
-        case CONFIG_AT_GPRS:
+            gps_config_at_general();
         break;
         case CONFIG_AT_GPS:
+            gps_config_at_GPS();
+        break;
+        case CONFIG_AT_GPRS:
+            gps_config_at_GRPS();
+        break;
+        case CONFIG_AT_HTTP:
+            gps_config_at_HTTP();
+        break;
+        case CONFIG_AT_END:
             
         break;
-                    
         default:
             
         break;
