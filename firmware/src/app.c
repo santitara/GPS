@@ -54,8 +54,10 @@ void APP_Initialize ( void )
  ***********************************************************/
 void APP_Tasks ( void )
 {
+    delay_ms(2000);
     switch(appData.state)
     {
+        
         case CONFIG_AT_MODULE:
             gps_config_at_general();
         break;

@@ -99,7 +99,7 @@ void __ISR(_TIMER_4_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance0(void)          
 // ****************************************************************************
  void __ISR(_UART_2_VECTOR, ipl2AUTO) _IntHandlerDrvUsartInstance0(void)                //recibe y genera alertas por UART del modulo de comunicaciones
 {
-     uint8_t index = 0;
+    static uint8_t index = 0;
     if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_2_RECEIVE))
     {
         /* Make sure receive buffer has data availible */
@@ -107,9 +107,16 @@ void __ISR(_TIMER_4_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance0(void)          
         {
             /* Get the data from the buffer */
             gps_uart_v.rx_buffer[index] = PLIB_USART_ReceiverByteReceive(USART_ID_2);
-            if(gps_uart_v.rx_buffer[index] == '\n')
+            if(strstr(gps_uart_v.rx_buffer,"OK")!=NULL)
             {
-                gps_uart_v.flag_rx_end = 1;   
+                gps_uart_v.flag_rx_end = 1;
+                index = 0;
+                
+            }
+            else if(strstr(gps_uart_v.rx_buffer,"ERROR")!=NULL)
+            {
+                gps_uart_v.flag_rx_end = 1;
+                index = 0;
             }
             else
             {

@@ -22,3 +22,4 @@ extern gps_uart_t gps_uart_v;;
 /*********public functions prototype***********************************************************/
 
 uint8_t gps_uart_process_response(uint8_t * buff, const char *check_msg);
+void gps_uart_rx_state (void);
