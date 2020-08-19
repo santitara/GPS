@@ -32,6 +32,8 @@
 #include "string.h"
 #include "libgeohash-master/geohash.h"
 #include "gps/gps_config.h"
+#include "gps/gps_common.h"
+
 
  //****************************************************************************
  DRV_HANDLE flash_spi_handle;
@@ -54,10 +56,9 @@ void APP_Initialize ( void )
  ***********************************************************/
 void APP_Tasks ( void )
 {
-    delay_ms(2000);
+    delay_ms(1000);
     switch(appData.state)
     {
-        
         case CONFIG_AT_MODULE:
             gps_config_at_general();
         break;
@@ -71,7 +72,11 @@ void APP_Tasks ( void )
             gps_config_at_HTTP();
         break;
         case CONFIG_AT_END:
+        //comprobar si tengo que ir a configurar bluetooth
             
+        //si no voy a habilitar trama gps
+        
+        gps_config_at_GPS_reports();
         break;
         default:
             

@@ -3,6 +3,8 @@
 #include "app.h"
 #include "gps_common.h"
 const char *ERR = "ERROR";
+const char *UGNSINF0 = "+UGNSINF: 1,0";
+const char *UGNSINF1 = "+UGNSINF: 1,1";
 //#include "string.h"
 
 //#include "stdio.h"
@@ -64,12 +66,28 @@ void gps_uart_rx_state (void)
         {
             gps_config_v.state = gps_config_v.state_ok;
             gps_uart_v.flag_rx_end = 0;
+            gps_uart_v.index=0;
             memset(gps_uart_v.rx_buffer,0,255);
         }
         else if(gps_uart_process_response(gps_uart_v.rx_buffer,ERR))
         {
             gps_config_v.state = gps_config_v.state_ok;
             gps_uart_v.flag_rx_end = 0;
+            gps_uart_v.index=0;
+            memset(gps_uart_v.rx_buffer,0,255);
+        }
+        else if (gps_uart_process_response(gps_uart_v.rx_buffer,UGNSINF0))
+        {
+            gps_config_v.state = gps_config_v.state_ok;
+            gps_uart_v.flag_rx_end = 0;
+            gps_uart_v.index=0;
+            memset(gps_uart_v.rx_buffer,0,255);
+        }
+        else if (gps_uart_process_response(gps_uart_v.rx_buffer,UGNSINF1))
+        {
+            gps_config_v.state = gps_config_v.state_ok;
+            gps_uart_v.flag_rx_end = 0;
+            gps_uart_v.index=0;
             memset(gps_uart_v.rx_buffer,0,255);
         }
         else
@@ -82,11 +100,11 @@ void gps_uart_rx_state (void)
     else
     {
         gps_config_v.n_retries++; 
-        if(gps_config_v.n_retries > 254)
+        if(gps_config_v.n_retries > 2)
         {
             gps_config_v.state = gps_config_v.state_wrong;
             gps_config_v.n_retries = 0;
-            memset(gps_uart_v.rx_buffer,0,255);
+            //memset(gps_uart_v.rx_buffer,0,255);
         }
 
     }

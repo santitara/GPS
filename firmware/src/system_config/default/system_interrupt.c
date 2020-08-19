@@ -106,21 +106,31 @@ void __ISR(_TIMER_4_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance0(void)          
         if (PLIB_USART_ReceiverDataIsAvailable(USART_ID_2))
         {
             /* Get the data from the buffer */
-            gps_uart_v.rx_buffer[index] = PLIB_USART_ReceiverByteReceive(USART_ID_2);
-            if(strstr(gps_uart_v.rx_buffer,"OK")!=NULL)
+            gps_uart_v.rx_buffer[gps_uart_v.index] = PLIB_USART_ReceiverByteReceive(USART_ID_2);
+            if(strstr(gps_uart_v.rx_buffer,"\n")!=NULL)
             {
                 gps_uart_v.flag_rx_end = 1;
-                index = 0;
+                //index = 0;
                 
             }
-            else if(strstr(gps_uart_v.rx_buffer,"ERROR")!=NULL)
+           /* else if(strstr(gps_uart_v.rx_buffer,"ERROR")!=NULL)
             {
                 gps_uart_v.flag_rx_end = 1;
                 index = 0;
             }
+            else if(strstr(gps_uart_v.rx_buffer,"+UGNSINF: 1,0")!=NULL)
+            {
+                gps_uart_v.flag_rx_end = 1;
+                index = 0;
+            }
+            else if(strstr(gps_uart_v.rx_buffer,"+UGNSINF: 1,1")!=NULL)
+            {
+                gps_uart_v.flag_rx_end = 1;
+                index = 0;
+            }*/
             else
             {
-                index++;
+                gps_uart_v.index++;
             }
             
         }
