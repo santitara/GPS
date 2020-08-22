@@ -447,7 +447,7 @@ void gps_config_at_GPS_reports (void)
             //delay_ms(100);
             gps_config_v.msg = gps_data_v.data_frame_tx;// GPS_REPORT;
 			while(gps_uart_write(gps_data_v.data_frame_tx, sizeof(gps_config_v.msg)) != true);
-            delay_ms(300);
+            //delay_ms(300);
             //set next state
             gps_config_v.state = SEND_HTTP_FRAME;//WAIT_RESPONSE;
             //set state ok
@@ -459,11 +459,11 @@ void gps_config_at_GPS_reports (void)
 		break;
         case SEND_HTTP_FRAME:
             // Set msg to send
-            //delay_ms(300);
+            //delay_ms(00);
             gps_config_v.msg = GPRS_HTTP_ACTION;
             //send msg
 			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
-            //delay_ms(300);
+            delay_ms(500);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;//WAIT_RESPONSE;
             //set state ok

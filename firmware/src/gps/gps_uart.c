@@ -16,7 +16,10 @@ const char *UGNSINF1 = "+CGNSINF: 1,1";
 
 /*********private struct***********************************************************/
 struct tm tm_str;
-gps_data_lv gps_data_v;
+gps_data_lv gps_data_v = 
+{
+    .msg_num = 0,
+};
 gps_uart_t gps_uart_v;
 char year[4];
 char mes[2];
@@ -62,9 +65,18 @@ const char *URL_TERMINATOR ="\"\r\n";
 //POST
 //const char *URL_ST_TRACKER_GRAFANA2 = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=865067021287761\"\n\r";
 //GET
-const char *URL_ST_TRACKER_GRAFANA2 = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=865067028127128&payload=";
+const char *URL_ST_TRACKER_GRAFANA2 = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=865067028127199&payload=";
 const char *URL_LOCATEC = "AT+HTTPPARA=\"URL\",\"https://www.locatec.es/proyectos/manezylozano/ws/getData.php?";
-  
+ const char *TRAMA_INI = "[";
+ const char *TRAMA_GEO = "{%22fields%22:{%22latitude%22:";
+ const char *TRAMA_GEO2 = ",%22longitude%22:";
+ const char *TRAMA_GEO3 = "},%22tags%22:{},%22timestamp%22:null";
+ 
+ const char *TRAMA_TIMESTAMP ="%22},%22timestamp%22:";
+ const char *TRAMA_NEXT = "},";
+ const char *TRAMA_END = "}]\"\r\n";
+ 
+ //const char *URL_ST_TRACKER_GRAFANA2 = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=865067028187128&payload=[{%22fields%22:{%22latitude%22:39.178832,%22longitude%22:-0.241623},%22tags%22:{},%22timestamp%22:123456789";
  
   
 /*********private functions prototype***********************************************************/
@@ -293,15 +305,9 @@ void gps_uart_get_speed(char *data)
 }
     
 void gps_uart_prepare_data_frame(void)  //escribe en trama_tx la URL para enviar al server
-{          
-       
-    //trama_registro[0]='\0';
-    //strcat(trama_registro,URL_LOCATEC);
-    memset(gps_data_v.data_frame_tx,0,255);
-    strcpy(gps_data_v.data_frame_tx,URL_LOCATEC);
-    //PAYLOAD EXAMPLE:
-    //36.323434&lng=0.123424&vel=2.08&fecha=23042019&hora=1632
-    //concatenador(*trama_registro);
+{            
+    
+    //strcpy(gps_data_v.data_frame_tx,URL_LOCATEC);
     
     if(gps_config_v.gps_state == 0)
     {  //si el gps no tiene fix preparo los datos 
@@ -310,6 +316,54 @@ void gps_uart_prepare_data_frame(void)  //escribe en trama_tx la URL para enviar
         strcpy(gps_data_v.speed_s,"0");
         strcpy(gps_data_v.time_stamp,"0000000000");
     }
+    
+    if(gps_data_v.msg_num == 0)
+    {
+        memset(gps_data_v.data_frame_tx,0,255);
+        strcpy(gps_data_v.data_frame_tx,URL_ST_TRACKER_GRAFANA2);
+        
+        strcat(gps_data_v.data_frame_tx,TRAMA_INI);
+         
+    }
+    
+    strcat(gps_data_v.data_frame_tx,TRAMA_GEO);
+    strcat(gps_data_v.data_frame_tx,gps_data_v.lat_s);
+
+    strcat(gps_data_v.data_frame_tx,TRAMA_GEO2);
+    strcat(gps_data_v.data_frame_tx,gps_data_v.lon_s);
+
+    strcat(gps_data_v.data_frame_tx,TRAMA_TIMESTAMP);
+    strcat(gps_data_v.data_frame_tx,gps_data_v.time_stamp);
+        
+    if(gps_data_v.msg_num == MSG_TO_SEND)
+    {
+        strcat(gps_data_v.data_frame_tx,TRAMA_END);
+        gps_data_v.msg_num = 0;
+    }
+    else
+    {
+        strcat(gps_data_v.data_frame_tx,TRAMA_NEXT);
+        gps_data_v.msg_num++;
+        gps_config_v.state = SET_GPS_REPORT;
+    }
+    
+            
+      
+        
+        
+   /* strcat(gps_data_v.data_frame_tx,TRAMA_INI);
+    strcat(gps_data_v.data_frame_tx,TRAMA_GEO);
+    strcat(gps_data_v.data_frame_tx,gps_data_v.lat_s);
+    
+    strcat(gps_data_v.data_frame_tx,TRAMA_GEO2);
+    strcat(gps_data_v.data_frame_tx,gps_data_v.lon_s);
+    
+    strcat(gps_data_v.data_frame_tx,TRAMA_GEO3);
+    strcat(gps_data_v.data_frame_tx,gps_data_v.time_stamp);
+    
+    strcat(gps_data_v.data_frame_tx,TRAMA_END);*/
+    
+    /*
         //variables que da el gps
         strcat(gps_data_v.data_frame_tx,VAR_DEV);
         strcat(gps_data_v.data_frame_tx,"12345678");  //IMEI COMO IDENTIFICADOR UNICO DE CADA DISPOSITIVO
@@ -331,6 +385,7 @@ void gps_uart_prepare_data_frame(void)  //escribe en trama_tx la URL para enviar
         strcat(gps_data_v.data_frame_tx,gps_data_v.time_stamp);
         
         strcat(gps_data_v.data_frame_tx,URL_TERMINATOR);  //cierro el comando
+     * */
 //    }
     
 }
@@ -357,3 +412,4 @@ void gps_uart_process_GNSINF(void)
 
     gps_uart_prepare_data_frame();
 }
+

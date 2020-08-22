@@ -5,11 +5,8 @@
         <group>
             <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/src/delay.c</file>
             <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/src/gps/gps_config.c</file>
-            <file>file:/C:/microchip/harmony/v1_07/framework/peripheral/int/templates/int_SourceFlag_Default.h</file>
-            <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/gpsv0.X/nbproject/Makefile-default.mk</file>
-            <file>file:/C:/microchip/harmony/v1_07/framework/driver/spi/src/drv_spi_sys_queue_fifo.c</file>
+            <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/src/gps/gps_uart.h</file>
             <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/src/main.c</file>
-            <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/src/gps/AT_comands.h</file>
             <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/src/system_config/default/system_exceptions.c</file>
             <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/src/system_config/default/system_interrupt.c</file>
             <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/src/gps/gps_common.h</file>

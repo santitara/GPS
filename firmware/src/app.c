@@ -82,7 +82,7 @@ void APP_Tasks ( void )
         //comprobar si tengo que ir a configurar bluetooth
             
         //si no voy a habilitar trama gps
-        delay_ms(1000);
+        delay_ms(100);
         gps_config_at_GPS_reports();
         break;
         default:

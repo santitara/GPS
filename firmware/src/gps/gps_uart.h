@@ -2,7 +2,7 @@
 #include "stdint.h"
 #define BUFF_SIZE_TX    255
 #define BUFF_SIZE_RX    255
-
+#define MSG_TO_SEND     2
 /*********pubic enum***************************************************************/
 
 
@@ -14,7 +14,7 @@ typedef struct
     uint8_t flag_rx_end;
     uint8_t index;
     char data_gps[BUFF_SIZE_RX];
-    char *ptr;
+    char *ptr;  
 }gps_uart_t;
 
 extern gps_uart_t gps_uart_v;;
