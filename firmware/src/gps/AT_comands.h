@@ -14,9 +14,10 @@
      const char *ANT_GPS_ON = "AT+CGPIO=0,39,1,1\r\n";
      const char *ANT_GPS_OFF = "AT+CGPIO=0,39,1,0\r\n";
      const char *GPS_GET_POS = "AT+CGNSINF\r\n";
-     const char *GPS_REPORT = "AT+CGNSURC=5\r\n"; ////int frequency (0-255), 0=0FF;1=1s;2=2s....ETC UNTIL 255
+     const char *GPS_REPORT = "AT+CGNSURC=2\r\n"; ////int frequency (0-255), 0=0FF;1=1s;2=2s....ETC UNTIL 255
      const char *GPS_REPORT_OFF = "AT+CGNSURC=0\r\n"; ////int frequency (0-255), 0=0FF;1=1s;2=2s....ETC UNTIL 255
-    //GPRS
+     const char *GPS_INFORM = "AT+CGNSINF\r\n";
+     //GPRS
     const char *ATTACH_GPRS = "AT+CGATT=1\r\n";
     const char *DEATTACH_GPRS = "AT+CGATT=0\r\n"; 
     const char *GPRS_ATTACHED = "AT+CGATT?\r\n";

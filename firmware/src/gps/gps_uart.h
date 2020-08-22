@@ -9,10 +9,12 @@
 /*********public struct***********************************************************/
 typedef struct
 {
-    uint8_t rx_buffer[BUFF_SIZE_RX];
-	uint8_t tx_buffer[BUFF_SIZE_TX];
+    char rx_buffer[BUFF_SIZE_RX];
+	char tx_buffer[BUFF_SIZE_TX];
     uint8_t flag_rx_end;
     uint8_t index;
+    char data_gps[BUFF_SIZE_RX];
+    char *ptr;
 }gps_uart_t;
 
 extern gps_uart_t gps_uart_v;;

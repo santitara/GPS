@@ -9,7 +9,8 @@
 
 
 const char *OK = "OK";
-
+//const char *UGNSINF0 = "+CGNSINF: 1,0";
+//const char *UGNSINF1 = "+CGNSINF: 1,1";
 /*********private enum***************************************************************/
 
 /*********private functions prototype***********************************************************/
@@ -26,14 +27,16 @@ gps_config_lv gps_config_v =
 	.module_status_bit = 0,
 	.msg_receive = 0,
     .n_retries = 0,
+    .gsm_state = 0,
+    .gps_state = 0,
 
 };
 
 void gps_config_init_module (void)
 {
 	// clear buff rx and tx
-	memset(gps_uart_v.rx_buffer,0,BUFF_SIZE_RX);
-	memset(gps_uart_v.tx_buffer,0,BUFF_SIZE_RX);
+	memset(gps_uart_v.rx_buffer,1,BUFF_SIZE_RX);
+	memset(gps_uart_v.tx_buffer,1,BUFF_SIZE_RX);
     /*stop interrupts*/
     DRV_TMR0_Stop();
     DRV_TMR1_Stop();
@@ -154,7 +157,7 @@ void gps_config_at_GPS (void)
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
-            gps_config_v.state_ok = NEXT_CONFIG_MODULE;
+            gps_config_v.state_ok = SET_ECHO_OFF;
             //set wrong state
             gps_config_v.state_wrong = SET_GPS_ON;
             //set msg expected
@@ -397,6 +400,7 @@ void gps_config_at_HTTP(void)
 		break;
          case NEXT_CONFIG_MODULE:
             appData.state = CONFIG_AT_END;
+            gps_config_v.gsm_state = 1;
         break; 
         
         case WAIT_RESPONSE:
@@ -417,31 +421,57 @@ void gps_config_at_GPS_reports (void)
 	{
         case SET_GPS_REPORT:
 			// Set msg to send
-			gps_config_v.msg = GPS_REPORT;
+			gps_config_v.msg =GPS_INFORM;// GPS_REPORT;
 			//send msg
 			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
-            gps_config_v.state_ok = PROCESS_REPORT_GPS_BT;
+            gps_config_v.state_ok = SET_HTTP_FRAME;//SET_HTTP_FRAME;
             //set wrong state
-            gps_config_v.state_wrong = PROCESS_REPORT_GPS_BT;
+            gps_config_v.state_wrong = SET_GPS_REPORT;
+            //set msg expected
+            gps_config_v.expect_res = "+CGNSINF";
+            //set flag report
+            gps_config_v.flag_report = 1;
+            //set led off
+            PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,0);
+            // Clear the WDT timer  
+            //SYS_WDT_TimerClear ();
+            //PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,1);
+            DRV_TMR1_Start();  //enciendo el timer 2 que se encarga de manejar el led rojo de la placa
+		break;
+        case SET_HTTP_FRAME:
+            //send msg
+            //while(gps_uart_write(GPRS_HTTP_START, sizeof(gps_config_v.msg)) != true);
+            //delay_ms(100);
+            gps_config_v.msg = gps_data_v.data_frame_tx;// GPS_REPORT;
+			while(gps_uart_write(gps_data_v.data_frame_tx, sizeof(gps_config_v.msg)) != true);
+            delay_ms(300);
+            //set next state
+            gps_config_v.state = SEND_HTTP_FRAME;//WAIT_RESPONSE;
+            //set state ok
+            gps_config_v.state_ok = SET_GPS_REPORT;
+            //set wrong state
+            gps_config_v.state_wrong = SET_GPS_REPORT;
             //set msg expected
             gps_config_v.expect_res = OK;
 		break;
-        case PROCESS_REPORT_GPS_BT:
-			// Set msg to send
-			//gps_config_v.msg = ANT_GPS_ON;
-			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+        case SEND_HTTP_FRAME:
+            // Set msg to send
+            //delay_ms(300);
+            gps_config_v.msg = GPRS_HTTP_ACTION;
+            //send msg
+			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
+            //delay_ms(300);
             //set next state
-            gps_config_v.state = WAIT_RESPONSE;
+            gps_config_v.state = WAIT_RESPONSE;//WAIT_RESPONSE;
             //set state ok
-            gps_config_v.state_ok = WAIT_RESPONSE;
+            gps_config_v.state_ok = SET_GPS_REPORT;
             //set wrong state
-            gps_config_v.state_wrong = WAIT_RESPONSE;
+            gps_config_v.state_wrong = SET_GPS_REPORT;
             //set msg expected
-            gps_config_v.expect_res = OK;
+            gps_config_v.expect_res = "+HTTPACTION";
 		break;
         case NEXT_CONFIG_MODULE:
             gps_config_v.state = SET_GPS_REPORT;
@@ -455,3 +485,6 @@ void gps_config_at_GPS_reports (void)
         break;
     }
 }
+
+
+
