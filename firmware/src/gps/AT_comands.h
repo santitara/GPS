@@ -39,6 +39,7 @@
     const char *GPRS_HTTP_READ = "AT+HTTPREAD\r\n";
     const char *CID_SEL = "AT+HTTPPARA=\"CID\",1\r\n";
     const char *SSL_ENABLE="AT+HTTPSSL=1\r\n";
+    const char *URL_CONTENT_TYPE = "AT+HTTPPARA=\"CONTENT\",application/json\r\n";
     //BLUETOOTH
      const char *BTH_ON = "AT+BTPOWER=1\r\n";       
      const char *BTH_OFF = "AT+BTPOWER=0\r\n";        

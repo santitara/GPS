@@ -72,11 +72,11 @@ const char *URL_LOCATEC = "AT+HTTPPARA=\"URL\",\"https://www.locatec.es/proyecto
  const char *TRAMA_GEO2 = ",%22longitude%22:";
  const char *TRAMA_GEO3 = "},%22tags%22:{},%22timestamp%22:null";
  
- const char *TRAMA_TIMESTAMP ="%22},%22timestamp%22:";
+ const char *TRAMA_TIMESTAMP ="},%22timestamp%22:";
  const char *TRAMA_NEXT = "},";
  const char *TRAMA_END = "}]\"\r\n";
  
- //const char *URL_ST_TRACKER_GRAFANA2 = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=865067028187128&payload=[{%22fields%22:{%22latitude%22:39.178832,%22longitude%22:-0.241623},%22tags%22:{},%22timestamp%22:123456789";
+// const char *URL_ST_TRACKER_GRAFANA2 = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=865067028187128&payload=[{%22fields%22:{%22latitude%22:39.178832,%22longitude%22:-0.241623},%22tags%22:{},%22timestamp%22:123456789";
  
   
 /*********private functions prototype***********************************************************/
@@ -316,7 +316,11 @@ void gps_uart_prepare_data_frame(void)  //escribe en trama_tx la URL para enviar
         strcpy(gps_data_v.speed_s,"0");
         strcpy(gps_data_v.time_stamp,"0000000000");
     }
-    
+    //to test, predefined data frame
+    /*memset(gps_data_v.data_frame_tx,0,255);
+    strcpy(gps_data_v.data_frame_tx,URL_ST_TRACKER_GRAFANA2);
+    strcat(gps_data_v.data_frame_tx,TRAMA_END);  
+    */
     if(gps_data_v.msg_num == 0)
     {
         memset(gps_data_v.data_frame_tx,0,255);
