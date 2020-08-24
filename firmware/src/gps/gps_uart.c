@@ -65,7 +65,8 @@ const char *URL_TERMINATOR ="\"\r\n";
 //POST
 //const char *URL_ST_TRACKER_GRAFANA2 = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=865067021287761\"\n\r";
 //GET
-const char *URL_ST_TRACKER_GRAFANA2 = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=865067028127199&payload=";
+const char *URL_ST_TRACKER_GRAFANA2_1 = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=";
+const char *URL_ST_TRACKER_GRAFANA2_2 ="&payload=";
 const char *URL_LOCATEC = "AT+HTTPPARA=\"URL\",\"https://www.locatec.es/proyectos/manezylozano/ws/getData.php?";
  const char *TRAMA_INI = "[";
  const char *TRAMA_GEO = "{%22fields%22:{%22latitude%22:";
@@ -168,6 +169,11 @@ void gps_uart_rx_state (void)
         }
         else if(gps_uart_process_response(gps_uart_v.rx_buffer,"OK")/*gps_config_v.expect_res)*/)
         {
+            if(gps_config_v.flag_get_imei == 1)
+            {
+                strncpy(gps_data_v.imei,&gps_uart_v.rx_buffer[2],15);
+                gps_config_v.flag_get_imei = 0;
+            }
             gps_config_v.state = gps_config_v.state_ok;
             gps_uart_v.flag_rx_end = 0;
             gps_uart_v.index=0;
@@ -324,10 +330,10 @@ void gps_uart_prepare_data_frame(void)  //escribe en trama_tx la URL para enviar
     if(gps_data_v.msg_num == 0)
     {
         memset(gps_data_v.data_frame_tx,0,255);
-        strcpy(gps_data_v.data_frame_tx,URL_ST_TRACKER_GRAFANA2);
-        
-        strcat(gps_data_v.data_frame_tx,TRAMA_INI);
-         
+        strcpy(gps_data_v.data_frame_tx,URL_ST_TRACKER_GRAFANA2_1);
+        strcat(gps_data_v.data_frame_tx,gps_data_v.imei);
+        strcat(gps_data_v.data_frame_tx,URL_ST_TRACKER_GRAFANA2_2);
+        strcat(gps_data_v.data_frame_tx,TRAMA_INI); 
     }
     
     strcat(gps_data_v.data_frame_tx,TRAMA_GEO);

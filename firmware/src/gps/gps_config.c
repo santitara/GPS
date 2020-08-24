@@ -29,6 +29,7 @@ gps_config_lv gps_config_v =
     .n_retries = 0,
     .gsm_state = 0,
     .gps_state = 0,
+    .flag_get_imei = 0,
 
 };
 
@@ -163,7 +164,7 @@ void gps_config_at_GPS (void)
             //set msg expected
             gps_config_v.expect_res = OK;
 		break;
-        case SET_ANT_GPS_ON:
+        /*case SET_ANT_GPS_ON:
 			// Set msg to send
 			gps_config_v.msg = ANT_GPS_ON;
 			//send msg
@@ -172,12 +173,12 @@ void gps_config_at_GPS (void)
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
-            gps_config_v.state_ok = SET_ECHO_OFF;
+            gps_config_v.state_ok = SET_GET_IMEI;
             //set wrong state
             gps_config_v.state_wrong = SET_ANT_GPS_ON;
             //set msg expected
             gps_config_v.expect_res = OK;
-		break;
+		break;*/
         case SET_ECHO_OFF:
 			// Set msg to send
 			gps_config_v.msg = ECHO_OFF;
@@ -187,9 +188,25 @@ void gps_config_at_GPS (void)
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
-            gps_config_v.state_ok = NEXT_CONFIG_MODULE;
+            gps_config_v.state_ok = SET_GET_IMEI;
             //set wrong state
             gps_config_v.state_wrong = SET_ECHO_OFF;
+            //set msg expected
+            gps_config_v.expect_res = OK;
+		break;
+        case SET_GET_IMEI:
+			// Set msg to send
+			gps_config_v.msg = GET_IMEI;
+            gps_config_v.flag_get_imei = 1;
+			//send msg
+			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+             while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
+            //set next state
+            gps_config_v.state = WAIT_RESPONSE;
+            //set state ok
+            gps_config_v.state_ok = NEXT_CONFIG_MODULE;
+            //set wrong state
+            gps_config_v.state_wrong = SET_GET_IMEI;
             //set msg expected
             gps_config_v.expect_res = OK;
 		break;

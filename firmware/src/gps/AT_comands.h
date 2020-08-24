@@ -8,6 +8,7 @@
      const char *AT_FACTORY = "AT&F0\r\n";
      const char *BAUDRATE_SEL = "AT+IPR=115200\r\n";
      const char *AT_OFF = "AT+CPOWD=1\r\n";
+     const char *GET_IMEI = "AT+GSN\r\n";
      //GPS
      const char *GPS_ON = "AT+CGNSPWR=1\r\n";
      const char *GPS_OFF = "AT+CGNSPWR=0\r\n";
@@ -53,7 +54,6 @@
      const char *BTH_SEND = "AT+BTSPPSEND\r\n";
     // const char *BTH_MESSAGE_TERM= (char*)0x1A;
 
-     const char *GET_IMEI = "AT+GSN\r\n"; 
      const char *GET_CCID = "AT+CCID\r\n";
 
 #endif
