@@ -63,7 +63,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <sys/attribs.h>
 #include "app.h"
 #include "system_definitions.h"
-
+#include "gps/gps_uart.h"
+#include "gps/gps_common.h"
+#define OFF_DELAY_LED 14
 //extern tick_scaler_sirena;
 // *****************************************************************************
 // *****************************************************************************
@@ -72,11 +74,101 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 //                      TIMERS 
 // ****************************************************************************
+void led_blink(uint8_t num_blink);
 void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer para gestionar la entrada de comandos por botones +,- y D
 {
-  
+    //tick of timer is aproximately 10 ms/tick
+    static uint8_t ms_10 = 0;
+    static uint8_t ms_100 = 0; 
+    static uint8_t ms_1000 = 0;
+    static uint8_t state_led = 1;
+    static uint8_t ms_blink = 0;
+    static uint8_t t_off = 0;
+    static uint8_t t_on = 0;
+    static uint8_t ms_gps_report = 0;
+    ms_10++;
+    //increase up to 100ms
+    if(ms_10 == 10)
+    {
+        ms_100++;
+        ms_10=0;
+        ms_blink++;
+        ms_gps_report++;
+       
+        if(ms_gps_report >= 20)
+        {
+            gps_config_v.flag_gps_report = 1;
+            ms_gps_report = 0;
+        }
+        
+        if(ms_blink == 2)
+        {
+            led_blink(4);
+            ms_blink = 0;
+        }
+        
+        else if(ms_blink >2 && ms_blink <=8)
+        {
+            PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,0);
+        }
+        else if(ms_blink >8)
+        {
+            ms_blink = 0;
+        }
+        
+    }
+    //increse up to 1 sec
+    if(ms_100 == 10)
+    {
+        ms_1000++;
+        ms_100 = 0;
+        gps_config_v.tout++;
+        if(gps_config_v.tout>=5)
+        {
+            gps_config_v.flag_timeout = 1;
+            gps_config_v.tout = 0;
+        }
+        
+    }
+    //increase up to 1 min
+    if(ms_1000 == 60 )
+    {
+        ms_1000=0;
+    }
+    
+   
   PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_2);
 }
+
+void led_blink( uint8_t num_blink)
+{
+    static uint8_t state_led = 1;
+    static uint8_t t_on = 0;
+
+    if(t_on<=num_blink)
+    {
+        PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,state_led);
+        if(state_led)
+        {
+            state_led=0;
+        }
+        else
+        {
+            state_led = 1;
+        }
+
+    }
+    else if(t_on>num_blink && t_on<=OFF_DELAY_LED)
+    {
+       PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,0); 
+    }
+    else if(t_on>OFF_DELAY_LED)
+    {
+        t_on = 0;
+    }
+    t_on++;
+}
+        
  /*****************************************************************************/ 
  void __ISR(_TIMER_3_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance2(void)                 //timer para medir la velocidad mediante captador rueda
  {
@@ -96,20 +188,86 @@ void __ISR(_TIMER_4_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance0(void)          
 // ****************************************************************************
 //                      UART'S
 // ****************************************************************************
+const char *OKs="OK\r\n";
  void __ISR(_UART_2_VECTOR, ipl2AUTO) _IntHandlerDrvUsartInstance0(void)                //recibe y genera alertas por UART del modulo de comunicaciones
 {
-
+    static uint8_t index = 0;
+    uint8_t * ptr;
+    //char *ptr_rx[];
+    
     if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_2_RECEIVE))
     {
         /* Make sure receive buffer has data availible */
         if (PLIB_USART_ReceiverDataIsAvailable(USART_ID_2))
         {
             /* Get the data from the buffer */
-            PLIB_USART_ReceiverByteReceive(USART_ID_2);    
-        }     
+            gps_uart_v.rx_buffer[gps_uart_v.index] = PLIB_USART_ReceiverByteReceive(USART_ID_2);
+            if(gps_uart_v.rx_buffer[gps_uart_v.index] == '\n')
+            {
+                if(gps_uart_v.rx_buffer[(gps_uart_v.index)-1] == '\r')
+                {
+                    if(gps_uart_v.rx_buffer[(gps_uart_v.index)-2] == 'K')
+                    {
+                        if(gps_uart_v.rx_buffer[(gps_uart_v.index)-3] == 'O')
+                        {
+                            gps_uart_v.flag_rx_end = 1;
+                        }
+                        else
+                        {
+                            gps_uart_v.index++;
+                        }
+                    }
+                    //error case
+                    else if(gps_uart_v.rx_buffer[(gps_uart_v.index)-2] == 'R')
+                    {
+                        if(gps_uart_v.rx_buffer[(gps_uart_v.index)-3] == 'O')
+                        {
+                            if(gps_uart_v.rx_buffer[(gps_uart_v.index)-4] == 'R')
+                            {
+                                if(gps_uart_v.rx_buffer[(gps_uart_v.index)-5] == 'R')
+                                {
+                                    if(gps_uart_v.rx_buffer[(gps_uart_v.index)-6] == 'E')
+                                    {
+                                        gps_uart_v.flag_rx_end = 1;
+                                    }
+                                    else
+                                    {
+                                        gps_uart_v.index++;
+                                    }
+                                }
+                                else
+                                {
+                                    gps_uart_v.index++;
+                                }
+                            }
+                            else
+                            {
+                                gps_uart_v.index++;
+                            }
+                        }
+                        else
+                        {
+                            gps_uart_v.index++;
+                        }
+                    }
+                    else
+                    {
+                        gps_uart_v.index++;
+                    }
+                }
+                else
+                {
+                    gps_uart_v.index++;
+                }
+            }
+            else
+            {
+                gps_uart_v.index++;
+            }
+            
+        }
         PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_2_RECEIVE);
     }
-
     else if (PLIB_INT_SourceFlagGet(INT_ID_0,INT_SOURCE_USART_2_TRANSMIT))
     {
         PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_USART_2_TRANSMIT);

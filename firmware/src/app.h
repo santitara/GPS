@@ -179,50 +179,14 @@ extern "C" {
 */
 
 typedef enum
-{        
-    
-    SIM808_OFF_COM,
-    SIM808_OFF_CHECK_RESPONSE,  // undefined communication state with gsm module
-    SIM808_TURN_ON,
-            
-    SIM808_CONFIG,
-    GET_DEVICE_IMEI,
-            
-    SET_BT_PARAMETERS,    //BLUETOOTH STARTUP
-    BTH_WAIT_COMMAND,      //BLUETOOTH ACTIVE, WAITING COMMANDS
-    DISABLE_BT,
-    SIM808_CRASH_HANDLER, 
-    
-    SIM808_READY,      // idle state 
-         
-    PROCESAR_DATOS_RX,   //para procesar los datos de gps
-            
-    REFRESCAR_DISPLAY,
-    
-    INICIAR_CONEXION_GPRS,        
-    OBTENER_HORA_SERVIDOR,      //para enviar informacion por gprs
-    ENVIAR_TRAMA_SERVER,
-    TERMINAR_CONEXION_GPRS, 
-            
-    ESPERAR_ACCION_GPS_BT,
-
-    HABILITAR_INFORME_GPS,
-    INICIALIZAR_TRAMA_HTTP,
-    DESHABILITAR_INFORME_GPS,
-
-    GRABAR_DATOS_EN_FLASH,
-
-    COMPROBAR_ESTADO_REGISTRO_DISPOSITIVO,
-
-    ASIGNAR_SIM_DISPOSITIVO,
-
-    REGISTRAR_DISPOSITIVO,  
-            
-    UART_REINITIALIZE,
-            
-    RUTINA_TEST
-            
-} APP_STATES;
+{             
+    CONFIG_AT_MODULE = 0,
+    CONFIG_AT_GPRS,
+    CONFIG_AT_GPS,
+    CONFIG_AT_HTTP,
+    CONFIG_AT_BT,
+    CONFIG_AT_END,   
+} app_states_e;
 
 
 // *****************************************************************************
@@ -240,42 +204,7 @@ typedef enum
 
 typedef struct
 {
-
-	APP_STATES state;
-
-	bool Recibido_mensaje,Recibido_mensaje_BT,Recibido_mensaje_gps,Recibido_mensaje_potencia;
-    
-    const char *mensaje_a_enviar;
-    const char *mensaje_a_enviar2;
-      
-   //variables recuerdan estado potencia tronic
-    unsigned short nro_pantalla;  //indica numericamente la pantalla en que se encuentra el equipo
-    char parameter_array[22][11]; // lista de parametros asociados a la pantalla actual PRINCIPAL tiene el nº max de parametros 21
-    unsigned short nro_parametros;
-
-    unsigned short parpadeos_led_rojo;
-    /*
-    - Indicaciones del led rojo en placa:
-	- parpadeo 5 veces consecutivas si esta sin GPS ni GPRS
-	- parpadeo 4 veces si tiene GPRS y falta GPS, 
-	- parpadeo 3 veces si tiene GPS pero le falta cobertura GPRS 
-    - parpadeo 2 veces si tiene GPS y GPRS
-	- parpadeo 1 vez si tiene GPS y GPRS y ademas establece conexión con la web  estado OK divinisimo de la muerte
-	- apagado si el equipo no tiene tension
-    - fijo si el equipo tiene tension pero no esta listo para funcionar
-//    */
-    char modo_test;
-    char datos_gps_disponible;
-    // Lista de estadisticas del dispositivo (variables RAM temporales)
-    //double vel_max;   
-    char modo_rutina_test,cuenta_hab_bt;
-    
-    char gps_state,bt_state,gsm_state;
-    
-    unsigned short frecuencia_envio;
-    
-    unsigned int tick_scaler_sirena;
- 
+	app_states_e state;
 } APP_DATA;
 
 
