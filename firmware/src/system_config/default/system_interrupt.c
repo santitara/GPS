@@ -63,32 +63,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <sys/attribs.h>
 #include "app.h"
 #include "system_definitions.h"
-
-//variables de system_interrupt
-char trama_rx[BUFFER_RX_SIZE], primer_pulso=1,existe_captador=0;
-unsigned int nbyte=0;
-char poner_a_dormir=0;
-char system_in_sleep;
-unsigned int cuenta_pulsos_largos_mas=0,cuenta_pulsos_largos_menos=0,timeout_3s=0,timeout_1s=0,timeout_1s_bis = 0,veces_hab_bt=0;
-unsigned int pulsos_rueda=0,overflows_timer3;
-double cuenta_actual;
-
-//variables externas a system_interrupt
-extern int seconds, minutes, horas; 
-extern double distancia_gps,vel_rueda,distancia_rueda,vel_gps;  //perimetro de la circunferencia de la rueda
-extern char parado,guardar_en_flash;
-
-extern double vel_max;   
-extern char mostrar_en_display;
-extern char flag_envio_web;
-
-extern char real_data;
-//extern unsigned long DATOS_FLASH[DEVICE_ROW_SIZE_DIVIDED_BY_4]; 
-extern unsigned int blink_rate;
-int index_blink=0,enviar_bt=0;
-int tick_scaler=0,tick_scaler_2=0,tick_scaler_3=0,secuencia_led=0,n_parpadeos=0;
-
-extern char permision_to_send;
+#include "gps/gps_uart.h"
+#include "gps/gps_common.h"
+#define OFF_DELAY_LED 14
 //extern tick_scaler_sirena;
 // *****************************************************************************
 // *****************************************************************************
@@ -97,80 +74,101 @@ extern char permision_to_send;
 // *****************************************************************************
 //                      TIMERS 
 // ****************************************************************************
-void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void)                  //timer para gestionar la entrada de comandos por botones +,- y D
+void led_blink(uint8_t num_blink);
+void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer para gestionar la entrada de comandos por botones +,- y D
 {
-    //el tick basico de este timer es de 10 ms aprox	
-    
-    if(appData.modo_rutina_test==0){
-        appData.tick_scaler_sirena++;
-    }
-    
-    if( appData.tick_scaler_sirena>1000){ //a los 10 segundos de inactividad en el programa principal  
-       appData.tick_scaler_sirena=1000;   
-       //permision_to_send=1;
-       appData.state =  SIM808_CRASH_HANDLER;  //cambio a transicion hacer juego de luces
-    }
-    
-     //RED_LED_BLINK_RATE   
-    if(appData.gsm_state == 0){
-        if(tick_scaler_3<GSM_RECONECT_PERIOD){
-            tick_scaler_3++;
-          }
-        else{
-           tick_scaler_3=0;   
-           appData.state =  DESHABILITAR_INFORME_GPS;  //cambio a transicion para desconectar gps y reenganchar gsm
-
+    //tick of timer is aproximately 10 ms/tick
+    static uint8_t ms_10 = 0;
+    static uint8_t ms_100 = 0; 
+    static uint8_t ms_1000 = 0;
+    static uint8_t state_led = 1;
+    static uint8_t ms_blink = 0;
+    static uint8_t t_off = 0;
+    static uint8_t t_on = 0;
+    static uint8_t ms_gps_report = 0;
+    ms_10++;
+    //increase up to 100ms
+    if(ms_10 == 10)
+    {
+        ms_100++;
+        ms_10=0;
+        ms_blink++;
+        ms_gps_report++;
+       
+        if(ms_gps_report >= 20)
+        {
+            gps_config_v.flag_gps_report = 1;
+            ms_gps_report = 0;
         }
-    }
-    
-    if(tick_scaler<RED_LED_PERIOD){
-      tick_scaler++;
-    }
-    else{
-       tick_scaler=0;   
-       secuencia_led=1;
-       n_parpadeos = appData.parpadeos_led_rojo;
-    }
-    if(secuencia_led>0){
-    //hago la secuencia del led 
         
-        switch(secuencia_led){
-            case 1:
-                PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,1);
-                tick_scaler_2=0;
-                secuencia_led++;
-                break;
-            case 2:
-                if(tick_scaler_2<RED_LED_BLINK_RATE){   //cuento el tiempo que debe estar encendido
-                    tick_scaler_2++;
-                }
-                else{
-                   PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,0);  //apago el led rojo 
-                   tick_scaler_2=0;     
-                   n_parpadeos--;
-                   if(n_parpadeos==0){
-                        secuencia_led=0;  //termino la secuencia
-                   }
-                   else{
-                       secuencia_led++; //voy al case 3
-                   }
-                   
-                }
-                break;
-                case 3:
-                    if(tick_scaler_2<(RED_LED_BLINK_RATE*4)){  //espero RED_LED_PERIOD con el led apagado
-                        tick_scaler_2++;
-                    }
-                    else{
-                       tick_scaler_2=0;   
-                       secuencia_led=1;  //vuelvo al case 1
-                    }    
-                    break;
+        if(ms_blink == 2)
+        {
+            led_blink(4);
+            ms_blink = 0;
         }
-    }  
+        
+        else if(ms_blink >2 && ms_blink <=8)
+        {
+            PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,0);
+        }
+        else if(ms_blink >8)
+        {
+            ms_blink = 0;
+        }
+        
+    }
+    //increse up to 1 sec
+    if(ms_100 == 10)
+    {
+        ms_1000++;
+        ms_100 = 0;
+        gps_config_v.tout++;
+        if(gps_config_v.tout>=5)
+        {
+            gps_config_v.flag_timeout = 1;
+            gps_config_v.tout = 0;
+        }
+        
+    }
+    //increase up to 1 min
+    if(ms_1000 == 60 )
+    {
+        ms_1000=0;
+    }
     
+   
   PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_2);
 }
+
+void led_blink( uint8_t num_blink)
+{
+    static uint8_t state_led = 1;
+    static uint8_t t_on = 0;
+
+    if(t_on<=num_blink)
+    {
+        PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,state_led);
+        if(state_led)
+        {
+            state_led=0;
+        }
+        else
+        {
+            state_led = 1;
+        }
+
+    }
+    else if(t_on>num_blink && t_on<=OFF_DELAY_LED)
+    {
+       PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,0); 
+    }
+    else if(t_on>OFF_DELAY_LED)
+    {
+        t_on = 0;
+    }
+    t_on++;
+}
+        
  /*****************************************************************************/ 
  void __ISR(_TIMER_3_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance2(void)                 //timer para medir la velocidad mediante captador rueda
  {
@@ -190,69 +188,86 @@ void __ISR(_TIMER_4_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance0(void)          
 // ****************************************************************************
 //                      UART'S
 // ****************************************************************************
+const char *OKs="OK\r\n";
  void __ISR(_UART_2_VECTOR, ipl2AUTO) _IntHandlerDrvUsartInstance0(void)                //recibe y genera alertas por UART del modulo de comunicaciones
 {
-
+    static uint8_t index = 0;
+    uint8_t * ptr;
+    //char *ptr_rx[];
+    
     if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_2_RECEIVE))
     {
         /* Make sure receive buffer has data availible */
         if (PLIB_USART_ReceiverDataIsAvailable(USART_ID_2))
         {
             /* Get the data from the buffer */
-            trama_rx[nbyte] = PLIB_USART_ReceiverByteReceive(USART_ID_2);
-
-                if (trama_rx[nbyte] == '\n'){
-                    
-                    if(trama_rx[(nbyte-1)] =='\r'){
-                        
-                        appData.Recibido_mensaje_BT = true;  //posibilidad de que haya llegado un comando bluetooth sino el bucle princ del programa ignora y sigue su curso
-                        if((BUFFER_RX_SIZE-nbyte)<BUFFER_REMAIN_LIMIT){
-                            nbyte=0;
+            gps_uart_v.rx_buffer[gps_uart_v.index] = PLIB_USART_ReceiverByteReceive(USART_ID_2);
+            if(gps_uart_v.rx_buffer[gps_uart_v.index] == '\n')
+            {
+                if(gps_uart_v.rx_buffer[(gps_uart_v.index)-1] == '\r')
+                {
+                    if(gps_uart_v.rx_buffer[(gps_uart_v.index)-2] == 'K')
+                    {
+                        if(gps_uart_v.rx_buffer[(gps_uart_v.index)-3] == 'O')
+                        {
+                            gps_uart_v.flag_rx_end = 1;
                         }
-                        if(trama_rx[(nbyte-2)] =='K'){
-                            
-                            if(trama_rx[(nbyte-3)] =='O'){
-                                //nbyte=0;
-                                appData.Recibido_mensaje = true;
-                                if((BUFFER_RX_SIZE-nbyte)<BUFFER_REMAIN_LIMIT){
-                                    nbyte=0;
-                                }
-                            }
-                            else{
-                                nbyte++;
-                            }  
-                        }
-                        else if(trama_rx[(nbyte-2)] ==','){
-                            
-                            if(trama_rx[(nbyte-3)] ==','){
-                                appData.Recibido_mensaje_gps = true;
-                                if((BUFFER_RX_SIZE-nbyte)<BUFFER_REMAIN_LIMIT){
-                                    nbyte=0;
-                                }
-                            }
-                            else{
-                                nbyte++;
-                            }
-                        }
-                        else{
-                            nbyte++;
+                        else
+                        {
+                            gps_uart_v.index++;
                         }
                     }
-                    else{
-                        nbyte++;
-                    }   
+                    //error case
+                    else if(gps_uart_v.rx_buffer[(gps_uart_v.index)-2] == 'R')
+                    {
+                        if(gps_uart_v.rx_buffer[(gps_uart_v.index)-3] == 'O')
+                        {
+                            if(gps_uart_v.rx_buffer[(gps_uart_v.index)-4] == 'R')
+                            {
+                                if(gps_uart_v.rx_buffer[(gps_uart_v.index)-5] == 'R')
+                                {
+                                    if(gps_uart_v.rx_buffer[(gps_uart_v.index)-6] == 'E')
+                                    {
+                                        gps_uart_v.flag_rx_end = 1;
+                                    }
+                                    else
+                                    {
+                                        gps_uart_v.index++;
+                                    }
+                                }
+                                else
+                                {
+                                    gps_uart_v.index++;
+                                }
+                            }
+                            else
+                            {
+                                gps_uart_v.index++;
+                            }
+                        }
+                        else
+                        {
+                            gps_uart_v.index++;
+                        }
+                    }
+                    else
+                    {
+                        gps_uart_v.index++;
+                    }
                 }
-                else{      
-                    nbyte++;
-                }    
-            //}  
-            if(nbyte>(BUFFER_RX_SIZE-1)){
-                nbyte=0; //curarme en salud cuando desborde el buffer
+                else
+                {
+                    gps_uart_v.index++;
+                }
             }
-        }     
+            else
+            {
+                gps_uart_v.index++;
+            }
+            
+        }
         PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_2_RECEIVE);
     }
-
     else if (PLIB_INT_SourceFlagGet(INT_ID_0,INT_SOURCE_USART_2_TRANSMIT))
     {
         PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_USART_2_TRANSMIT);

@@ -435,8 +435,7 @@ void DRV_USART1_TasksTransmit(void)
         SYS_INT_SourceStatusClear(INT_SOURCE_USART_1_TRANSMIT);
     }
 }
-char received_byte,buffer_rx_potencia[150];
-int index_rx_pot=0;
+
 void DRV_USART1_TasksReceive(void)
 {
     /* This is the USART Driver Receive tasks routine. If the receive
@@ -446,36 +445,6 @@ void DRV_USART1_TasksReceive(void)
     /* Reading the receive interrupt flag */
     if(SYS_INT_SourceStatusGet(INT_SOURCE_USART_1_RECEIVE))
     {
-        //aqui implementar la tarea de recepcion de los datos que emite la potencia tronic
-        buffer_rx_potencia[index_rx_pot]= PLIB_USART_ReceiverByteReceive(USART_ID_1);
-        if (buffer_rx_potencia[index_rx_pot] == '\n'){
-            if(buffer_rx_potencia[(index_rx_pot-1)] =='\r'){
-                appData.Recibido_mensaje_potencia = true;  //posibilidad de que haya llegado un comando bluetooth sino el bucle princ del programa ignora y sigue su curso
-                buffer_rx_potencia[(index_rx_pot-1)]='\0'; //para finalizar la cadena al final del ultimo parametro del mensaje
-                index_rx_pot=0;
-            }
-            else{
-                index_rx_pot++;
-            } 
-        }    
-        else{
-            index_rx_pot++;    
-        }
-        
-        if(index_rx_pot>149){
-                index_rx_pot=0; //curarme en salud cuando desborde el buffer
-            }
-        
-        
-        /* //prueba minima de recepcion de esta uart  
-        if(received_byte=='n'){
-           PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,0); 
-        }
-        else if (received_byte=='y'){
-           PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,1); 
-        }
-         * 
-        /* Clear up the interrupt flag */
         SYS_INT_SourceStatusClear(INT_SOURCE_USART_1_RECEIVE);
     }
 }

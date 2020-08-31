@@ -38,6 +38,7 @@
         <itemPath>../src/drv_i2c_static.h</itemPath>
         <itemPath>../src/bmm050_support.h</itemPath>
         <itemPath>../src/libgeohash-master/geohash.h</itemPath>
+        <itemPath>../src/buffer_circular.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f1" displayName="driver" projectFiles="true">
@@ -86,6 +87,11 @@
           </logicalFolder>
           <itemPath>../../../../framework/system/system.h</itemPath>
         </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="f3" displayName="gps" projectFiles="true">
+        <itemPath>../src/gps/AT_comands.h</itemPath>
+        <itemPath>../src/gps/gps_config.h</itemPath>
+        <itemPath>../src/gps/gps_common.h</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
@@ -149,6 +155,10 @@
         <itemPath>../src/main.c</itemPath>
         <itemPath>../src/delay.c</itemPath>
         <itemPath>../src/bmc150.c</itemPath>
+        <itemPath>../src/buffer_circular.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="fifo" displayName="fifo" projectFiles="true">
+        <itemPath>../src/fifo/fifo.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f1" displayName="driver" projectFiles="true">
@@ -197,6 +207,11 @@
           </logicalFolder>
         </logicalFolder>
       </logicalFolder>
+      <logicalFolder name="f3" displayName="gps" projectFiles="true">
+        <itemPath>../src/gps/gps_config.c</itemPath>
+        <itemPath>../src/gps/gps_uart.c</itemPath>
+        <itemPath>../src/gps/gps_logic.c</itemPath>
+      </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -220,7 +235,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion>1.40</languageToolchainVersion>
+        <languageToolchainVersion>2.41</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -394,7 +409,6 @@
         <property key="UART2" value="true"/>
         <property key="USB" value="true"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
-        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="false"/>
@@ -412,7 +426,7 @@
         <property key="memories.programmemory.partition2.start"
                   value="${memories.programmemory.partition2.start.value}"/>
         <property key="memories.programmemory.start" value="0x1d000000"/>
-        <property key="poweroptions.powerenable" value="true"/>
+        <property key="poweroptions.powerenable" value="false"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.preservedataflash" value="false"/>
