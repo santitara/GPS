@@ -146,6 +146,7 @@ void gps_uart_rx_state (void)
             gps_uart_v.flag_rx_end = 0;
             gps_uart_v.index=0;
             gps_uart_v.ptr = strstr(gps_uart_v.rx_buffer,UGNSINF0);
+            gps_config_v.gps_state = 0;
             if(gps_uart_v.ptr != NULL)
             {
                 gps_uart_process_GNSINF();
@@ -167,8 +168,9 @@ void gps_uart_rx_state (void)
             }
             memset(gps_uart_v.rx_buffer,1,255);
         }
-        else if(gps_uart_process_response(gps_uart_v.rx_buffer,"OK")/*gps_config_v.expect_res)*/)
+        else if(gps_uart_process_response(gps_uart_v.rx_buffer,"OK"))
         {
+            //get imei data and store
             if(gps_config_v.flag_get_imei == 1)
             {
                 strncpy(gps_data_v.imei,&gps_uart_v.rx_buffer[2],15);
@@ -181,38 +183,11 @@ void gps_uart_rx_state (void)
         }
         else if(gps_uart_process_response(gps_uart_v.rx_buffer,ERR))
         {
-            gps_config_v.state = gps_config_v.state_ok;
+            gps_config_v.state = gps_config_v.state_wrong;
             gps_uart_v.flag_rx_end = 0;
             gps_uart_v.index=0;
             memset(gps_uart_v.rx_buffer,1,255);
         }
-        /*/else if (gps_uart_process_response(gps_uart_v.rx_buffer,UGNSINF0))
-        {
-            gps_config_v.state = gps_config_v.state_ok;
-            gps_uart_v.flag_rx_end = 0;
-            gps_uart_v.index=0;
-            gps_uart_v.ptr = strstr(gps_uart_v.rx_buffer,UGNSINF0);
-            if(gps_uart_v.ptr != NULL)
-            {
-                gps_uart_process_GNSINF();
-            }
-            memset(gps_uart_v.rx_buffer,1,255);
-        }
-        else if (gps_uart_process_response(gps_uart_v.rx_buffer,UGNSINF1))
-        {
-            gps_config_v.flag_report_rx =0;
-            gps_config_v.state = gps_config_v.state_ok;
-            gps_uart_v.flag_rx_end = 0;
-            gps_uart_v.index=0;
-            gps_config_v.gps_state = 1;
-
-            gps_uart_v.ptr = strstr(gps_uart_v.rx_buffer,UGNSINF1);
-            if(gps_uart_v.ptr != NULL)
-            {
-                gps_uart_process_GNSINF();
-            }
-            memset(gps_uart_v.rx_buffer,1,255);
-        }*/
         else
         {
             gps_config_v.state = gps_config_v.state_wrong;
@@ -354,7 +329,7 @@ void gps_uart_prepare_data_frame(void)  //escribe en trama_tx la URL para enviar
     {
         strcat(gps_data_v.data_frame_tx,TRAMA_NEXT);
         gps_data_v.msg_num++;
-        gps_config_v.state = SET_GPS_REPORT;
+        gps_config_v.state = IDLE;
     }
     
             
@@ -418,8 +393,10 @@ void gps_uart_process_GNSINF(void)
     gps_uart_get_longitude(ptr_data_gps);
     //get speed
     ptr_data_gps = strtok(NULL,",");
+    ptr_data_gps = strtok(NULL,",");
     gps_uart_get_speed(ptr_data_gps);
 
     gps_uart_prepare_data_frame();
+    gps_buff_c_ptr_v.head++;
 }
 

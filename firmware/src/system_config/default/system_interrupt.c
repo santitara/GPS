@@ -85,6 +85,7 @@ void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer p
     static uint8_t ms_blink = 0;
     static uint8_t t_off = 0;
     static uint8_t t_on = 0;
+    static uint8_t ms_gps_report = 0;
     ms_10++;
     //increase up to 100ms
     if(ms_10 == 10)
@@ -92,14 +93,19 @@ void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer p
         ms_100++;
         ms_10=0;
         ms_blink++;
-        
+        ms_gps_report++;
+       
+        if(ms_gps_report >= 10)
+        {
+            gps_config_v.flag_gps_report = 1;
+            ms_gps_report = 0;
+        }
         
         if(ms_blink == 2)
         {
             led_blink(4);
             ms_blink = 0;
         }
-        
         
         else if(ms_blink >2 && ms_blink <=8)
         {
@@ -109,6 +115,7 @@ void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer p
         {
             ms_blink = 0;
         }
+        
     }
     //increse up to 1 sec
     if(ms_100 == 10)
@@ -121,6 +128,7 @@ void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer p
             gps_config_v.flag_timeout = 1;
             gps_config_v.tout = 0;
         }
+        
     }
     //increase up to 1 min
     if(ms_1000 == 60 )
@@ -203,6 +211,39 @@ const char *OKs="OK\r\n";
                         if(gps_uart_v.rx_buffer[(gps_uart_v.index)-3] == 'O')
                         {
                             gps_uart_v.flag_rx_end = 1;
+                        }
+                        else
+                        {
+                            gps_uart_v.index++;
+                        }
+                    }
+                    //error case
+                    else if(gps_uart_v.rx_buffer[(gps_uart_v.index)-2] == 'R')
+                    {
+                        if(gps_uart_v.rx_buffer[(gps_uart_v.index)-3] == 'O')
+                        {
+                            if(gps_uart_v.rx_buffer[(gps_uart_v.index)-3] == 'R')
+                            {
+                                if(gps_uart_v.rx_buffer[(gps_uart_v.index)-3] == 'R')
+                                {
+                                    if(gps_uart_v.rx_buffer[(gps_uart_v.index)-3] == 'E')
+                                    {
+                                        gps_uart_v.flag_rx_end = 1;
+                                    }
+                                    else
+                                    {
+                                        gps_uart_v.index++;
+                                    }
+                                }
+                                else
+                                {
+                                    gps_uart_v.index++;
+                                }
+                            }
+                            else
+                            {
+                                gps_uart_v.index++;
+                            }
                         }
                         else
                         {

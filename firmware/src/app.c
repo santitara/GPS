@@ -33,12 +33,13 @@
 #include "libgeohash-master/geohash.h"
 #include "gps/gps_config.h"
 #include "gps/gps_common.h"
+#include "fifo/fifo.h"
 
 
- //****************************************************************************
- DRV_HANDLE flash_spi_handle;
- DRV_SST25VF064C_BLOCK_COMMAND_HANDLE  commandHandle1,commandHandle2,commandHandle3;
- DRV_SST25VF064C_COMMAND_STATUS f_status;
+//****************************************************************************
+DRV_HANDLE flash_spi_handle;
+DRV_SST25VF064C_BLOCK_COMMAND_HANDLE  commandHandle1,commandHandle2,commandHandle3;
+DRV_SST25VF064C_COMMAND_STATUS f_status;
  
 /*private function prototipe */
  void check_led_status(void);
@@ -50,7 +51,7 @@ APP_DATA appData;
 void APP_Initialize ( void )
 {  
     gps_config_init_module ();
-    gps_config_ON_OFF_module(); 
+    gps_config_ON_OFF_module();
 }
 /**********************************************************
  * Application tasks routine. This function implements the
@@ -82,7 +83,7 @@ void APP_Tasks ( void )
         //comprobar si tengo que ir a configurar bluetooth
             
         //si no voy a habilitar trama gps
-        delay_ms(100);
+        //delay_ms(100);
         gps_config_at_GPS_reports();
         break;
         default:

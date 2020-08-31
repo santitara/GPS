@@ -30,7 +30,15 @@ gps_config_lv gps_config_v =
     .gsm_state = 0,
     .gps_state = 0,
     .flag_get_imei = 0,
+    .flag_gps_report = 0,
 
+};
+
+gps_buff_c_ptr_lv gps_buff_c_ptr_v = 
+{
+    .head = 0,
+    .tail = 0,
+    .max = 0,
 };
 
 void gps_config_init_module (void)
@@ -433,6 +441,13 @@ void gps_config_at_HTTP(void)
          case NEXT_CONFIG_MODULE:
             appData.state = CONFIG_AT_END;
             gps_config_v.gsm_state = 1;
+            //set led off
+            PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,0);
+            // Clear the WDT timer  
+            //SYS_WDT_TimerClear ();
+            //PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,1);
+            DRV_TMR1_Start();  //enciendo el timer 2 que se encarga de manejar el led rojo de la placa
+            
         break; 
         
         case WAIT_RESPONSE:
@@ -465,13 +480,8 @@ void gps_config_at_GPS_reports (void)
             //set msg expected
             gps_config_v.expect_res = "+CGNSINF";
             //set flag report
-            gps_config_v.flag_report = 1;
-            //set led off
-            PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,0);
-            // Clear the WDT timer  
-            //SYS_WDT_TimerClear ();
-            //PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,1);
-            DRV_TMR1_Start();  //enciendo el timer 2 que se encarga de manejar el led rojo de la placa
+            //gps_config_v.flag_report = 1;
+            
 		break;
         case SET_HTTP_FRAME:
             //send msg
@@ -499,7 +509,7 @@ void gps_config_at_GPS_reports (void)
             //set next state
             gps_config_v.state = WAIT_RESPONSE;//WAIT_RESPONSE;
             //set state ok
-            gps_config_v.state_ok = SET_GPS_REPORT;
+            gps_config_v.state_ok = IDLE;
             //set wrong state
             gps_config_v.state_wrong = SET_GPS_REPORT;
             //set msg expected
@@ -512,6 +522,25 @@ void gps_config_at_GPS_reports (void)
         case WAIT_RESPONSE:
 			gps_uart_rx_state ();
 		break;
+        case IDLE:
+            if(gps_config_v.flag_gps_report)
+            {
+                if(!buffer_circular_is_full(gps_buff_c_ptr_v.tail,gps_buff_c_ptr_v.head,gps_buff_c_ptr_v.max))
+                {
+                    gps_config_v.state = SET_GPS_REPORT;
+                    gps_config_v.flag_gps_report = 0;
+                }
+                else
+                {
+                    gps_config_v.state = SET_HTTP_FRAME;
+                }
+             
+            }
+            else
+            {
+                
+            }
+        break;
         default:
             
         break;
