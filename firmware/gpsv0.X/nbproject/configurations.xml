@@ -212,8 +212,6 @@
         <itemPath>../src/gps/gps_uart.c</itemPath>
         <itemPath>../src/gps/gps_logic.c</itemPath>
       </logicalFolder>
-      <logicalFolder name="f4" displayName="New Folder 4" projectFiles="true">
-      </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

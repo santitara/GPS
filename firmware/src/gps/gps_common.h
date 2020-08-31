@@ -36,7 +36,13 @@ typedef enum
     SET_CID_SEL,
     SET_SSL_ENABLE,
     SET_CONTENT_TYPE,
-    
+    //bluetooth config states
+    SET_AUTO_PAIR_BT,
+    SET_BT_ON,
+    SET_VIS_ON,        
+    SET_BT_ONE_CONN,  
+    SET_NAME_BT,
+            
     //gps enable info
     SET_GPS_REPORT,
     PROCESS_REPORT_GPS_BT,
@@ -83,14 +89,14 @@ typedef struct
 
 typedef struct
 {
-   char time_stamp[10][SIZE_CIRC_BUFF];
+   char time_stamp[10];
    double lat;
    double longi;
    double speed;
-   uint8_t data_frame_tx[510];
-   char lat_s[12][SIZE_CIRC_BUFF];
-   char lon_s[12][SIZE_CIRC_BUFF];
-   char speed_s[12][SIZE_CIRC_BUFF];
+   uint8_t data_frame_tx[700];
+   char lat_s[12];
+   char lon_s[12];
+   char speed_s[12];
    uint8_t msg_num;
    char imei[20];
 }gps_data_lv;

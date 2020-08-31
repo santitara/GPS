@@ -49,7 +49,7 @@
      const char *BTH_AUTO_PAIR= "AT+BTPAIRCFG=2\r\n";
      //const char *BTH_AUTO_PAIR= "AT+BTPAIRCFG=1,1234\r\n";
      const char *BTH_CH_NAME="AT+BTHOST=GPS_";
-     const char *BTH_ONE_CON="AT+BTSPPCFG=0\r\n";
+     const char *BTH_ONE_CON="AT+BTSPPCFG=MC,0\r\n";
      const char *BTH_SSP = "AT+BTACPT=1\r\n";               
      const char *BTH_SEND = "AT+BTSPPSEND\r\n";
     // const char *BTH_MESSAGE_TERM= (char*)0x1A;

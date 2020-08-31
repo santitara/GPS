@@ -21,14 +21,6 @@ gps_data_lv gps_data_v =
     .msg_num = 0,
 };
 gps_uart_t gps_uart_v;
-char year[4];
-char mes[2];
-char dia[2];
-char hora[2];
-char minuto[2];
-char segundo[2];
-int ret=0;
-char time_stamp[10];
 //etiquetas del gps
  const char *VAR_DEV ="dev=";
  const char *VAR_LAT ="lat=";
@@ -68,18 +60,19 @@ const char *URL_TERMINATOR ="\"\r\n";
 const char *URL_ST_TRACKER_GRAFANA2_1 = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=";
 const char *URL_ST_TRACKER_GRAFANA2_2 ="&payload=";
 const char *URL_LOCATEC = "AT+HTTPPARA=\"URL\",\"https://www.locatec.es/proyectos/manezylozano/ws/getData.php?";
- const char *TRAMA_INI = "[";
- const char *TRAMA_GEO = "{%22fields%22:{%22latitude%22:";
- const char *TRAMA_GEO2 = ",%22longitude%22:";
- const char *TRAMA_GEO3 = "},%22tags%22:{},%22timestamp%22:null";
- 
- const char *TRAMA_TIMESTAMP ="},%22timestamp%22:";
- const char *TRAMA_NEXT = "},";
- const char *TRAMA_END = "}]\"\r\n";
+const char *TRAMA_INI = "[";
+const char *TRAMA_GEO = "{%22fields%22:{%22latitude%22:";
+const char *TRAMA_GEO2 = ",%22longitude%22:";
+const char *TRAMA_GEO3 = "},%22tags%22:{},%22timestamp%22:null";
+
+const char *TRAMA_TIMESTAMP ="},%22timestamp%22:";
+const char *TRAMA_NEXT = "},";
+const char *TRAMA_END = "}]\"\r\n";
  
 // const char *URL_ST_TRACKER_GRAFANA2 = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=865067028187128&payload=[{%22fields%22:{%22latitude%22:39.178832,%22longitude%22:-0.241623},%22tags%22:{},%22timestamp%22:123456789";
  
-  
+const char *URL_TEST = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=867717038251048&payload=[{%22fields%22:{%22latitude%22:39.262280,%22longitude:%22-1.913421},%22timestamp%22:1598872665},{%22fields%22:{%22latitude%22:39.262280,%22longitude%22:-1.913421},%22timestamp%22:1598872667},{%22fields%22:{%22latitude%22:39.262280,%22longitude%22:-1.913421},%22timestamp%22:1598872669}]\"\r\n"; 
+
 /*********private functions prototype***********************************************************/
 void gps_uart_get_time(char *date);
 void gps_uart_get_latitude(char *data);
@@ -323,6 +316,9 @@ void gps_uart_prepare_data_frame(void)  //escribe en trama_tx la URL para enviar
     if(gps_data_v.msg_num == MSG_TO_SEND)
     {
         strcat(gps_data_v.data_frame_tx,TRAMA_END);
+        //memset(gps_data_v.data_frame_tx,0,255);
+        //strcpy(gps_data_v.data_frame_tx,URL_TEST);
+        
         gps_data_v.msg_num = 0;
     }
     else

@@ -58,9 +58,7 @@ void APP_Initialize ( void )
  * application state machine.
  ***********************************************************/
 void APP_Tasks ( void )
-{
-     
-           
+{  
     switch(appData.state)
     {
         case CONFIG_AT_MODULE:
@@ -78,6 +76,10 @@ void APP_Tasks ( void )
         case CONFIG_AT_HTTP:
             delay_ms(1000);
             gps_config_at_HTTP();
+        break;
+         case CONFIG_AT_BT:
+            delay_ms(1000);
+            gps_config_at_BT();
         break;
         case CONFIG_AT_END:
         //comprobar si tengo que ir a configurar bluetooth

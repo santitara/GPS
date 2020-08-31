@@ -184,6 +184,7 @@ typedef enum
     CONFIG_AT_GPRS,
     CONFIG_AT_GPS,
     CONFIG_AT_HTTP,
+    CONFIG_AT_BT,
     CONFIG_AT_END,   
 } app_states_e;
 

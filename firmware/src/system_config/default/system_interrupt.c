@@ -95,7 +95,7 @@ void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer p
         ms_blink++;
         ms_gps_report++;
        
-        if(ms_gps_report >= 10)
+        if(ms_gps_report >= 20)
         {
             gps_config_v.flag_gps_report = 1;
             ms_gps_report = 0;
@@ -222,11 +222,11 @@ const char *OKs="OK\r\n";
                     {
                         if(gps_uart_v.rx_buffer[(gps_uart_v.index)-3] == 'O')
                         {
-                            if(gps_uart_v.rx_buffer[(gps_uart_v.index)-3] == 'R')
+                            if(gps_uart_v.rx_buffer[(gps_uart_v.index)-4] == 'R')
                             {
-                                if(gps_uart_v.rx_buffer[(gps_uart_v.index)-3] == 'R')
+                                if(gps_uart_v.rx_buffer[(gps_uart_v.index)-5] == 'R')
                                 {
-                                    if(gps_uart_v.rx_buffer[(gps_uart_v.index)-3] == 'E')
+                                    if(gps_uart_v.rx_buffer[(gps_uart_v.index)-6] == 'E')
                                     {
                                         gps_uart_v.flag_rx_end = 1;
                                     }
