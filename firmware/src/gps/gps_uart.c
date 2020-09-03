@@ -178,20 +178,20 @@ void gps_uart_rx_state (void)
         }
         else if(gps_uart_process_response(gps_uart_v.rx_buffer,ERR))
         {
-            if(gps_config_v.flag_gprs_sent)
-            {
-                gps_config_v.state = ASK_COVERAGE;
-            }
-            else
-            {
+            //if(gps_config_v.flag_gprs_sent)
+            //{
+            //    gps_config_v.state = ASK_COVERAGE;
+            //}
+            //else
+            //{
                 gps_config_v.state = gps_config_v.state_wrong;
-            }
+            //}
             
             gps_uart_v.flag_rx_end = 0;
             gps_uart_v.index=0;
             memset(gps_uart_v.rx_buffer,1,255);
         }
-        else if(gps_uart_process_response(gps_uart_v.rx_buffer,CREG_OK))
+        /*else if(gps_uart_process_response(gps_uart_v.rx_buffer,CREG_OK))
         {
             gps_config_v.state = gps_config_v.state_ok;
             gps_uart_v.flag_rx_end = 0;
@@ -204,7 +204,7 @@ void gps_uart_rx_state (void)
             gps_uart_v.flag_rx_end = 0;
             gps_uart_v.index=0;
             memset(gps_uart_v.rx_buffer,1,255);
-        }
+        }*/
         else
         {
             gps_config_v.state = gps_config_v.state_wrong;

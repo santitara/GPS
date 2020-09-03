@@ -578,7 +578,7 @@ void gps_config_at_GPS_reports (void)
             //send msg
             //while(gps_uart_write(GPRS_HTTP_START, sizeof(gps_config_v.msg)) != true);
             //delay_ms(100);
-            gps_config_v.flag_gprs_sent = 1;
+            //gps_config_v.flag_gprs_sent = 1;
             gps_config_v.msg = gps_data_v.data_frame_tx;// GPS_REPORT;
 			while(gps_uart_write(gps_data_v.data_frame_tx, sizeof(gps_config_v.msg)) != true);
             //delay_ms(300);
@@ -632,7 +632,7 @@ void gps_config_at_GPS_reports (void)
         case IDLE:
             if(gps_config_v.flag_gps_report)
             {
-                gps_config_v.flag_gprs_sent = 0;    
+                //gps_config_v.flag_gprs_sent = 0;    
                 gps_config_v.state = SET_GPS_REPORT;
                 gps_config_v.flag_gps_report = 0;
             }
