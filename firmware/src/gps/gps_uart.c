@@ -7,6 +7,8 @@
 const char *ERR = "ERROR";
 const char *UGNSINF0 = "+CGNSINF: 1,0";
 const char *UGNSINF1 = "+CGNSINF: 1,1";
+const char *CREG_OK = "+CREG:0,1";
+const char *CREG_NOK = "+CREG:0,0";
 //#include "string.h"
 
 //#include "stdio.h"
@@ -176,7 +178,29 @@ void gps_uart_rx_state (void)
         }
         else if(gps_uart_process_response(gps_uart_v.rx_buffer,ERR))
         {
-            gps_config_v.state = gps_config_v.state_wrong;
+            if(gps_config_v.flag_gprs_sent)
+            {
+                gps_config_v.state = ASK_COVERAGE;
+            }
+            else
+            {
+                gps_config_v.state = gps_config_v.state_wrong;
+            }
+            
+            gps_uart_v.flag_rx_end = 0;
+            gps_uart_v.index=0;
+            memset(gps_uart_v.rx_buffer,1,255);
+        }
+        else if(gps_uart_process_response(gps_uart_v.rx_buffer,CREG_OK))
+        {
+            gps_config_v.state = gps_config_v.state_ok;
+            gps_uart_v.flag_rx_end = 0;
+            gps_uart_v.index=0;
+            memset(gps_uart_v.rx_buffer,1,255);
+        }
+        else if(gps_uart_process_response(gps_uart_v.rx_buffer,CREG_NOK))
+        {
+            gps_config_v.state = gps_config_v.state_ok;
             gps_uart_v.flag_rx_end = 0;
             gps_uart_v.index=0;
             memset(gps_uart_v.rx_buffer,1,255);
@@ -288,7 +312,7 @@ void gps_uart_prepare_data_frame(void)  //escribe en trama_tx la URL para enviar
         strcpy(gps_data_v.lat_s,"0");
         strcpy(gps_data_v.lon_s,"0");
         strcpy(gps_data_v.speed_s,"0");
-        strcpy(gps_data_v.time_stamp,"0000000000");
+        strcpy(gps_data_v.time_stamp,"null");
     }
     //to test, predefined data frame
     /*memset(gps_data_v.data_frame_tx,0,255);

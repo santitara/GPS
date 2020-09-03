@@ -33,7 +33,6 @@
 #include "libgeohash-master/geohash.h"
 #include "gps/gps_config.h"
 #include "gps/gps_common.h"
-#include "fifo/fifo.h"
 
 
 //****************************************************************************
@@ -52,6 +51,7 @@ void APP_Initialize ( void )
 {  
     gps_config_init_module ();
     gps_config_ON_OFF_module();
+    DRV_TMR1_Start();
 }
 /**********************************************************
  * Application tasks routine. This function implements the

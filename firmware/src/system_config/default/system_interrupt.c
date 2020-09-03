@@ -95,7 +95,7 @@ void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer p
         ms_blink++;
         ms_gps_report++;
        
-        if(ms_gps_report >= 20)
+        if(ms_gps_report >= 10)
         {
             gps_config_v.flag_gps_report = 1;
             ms_gps_report = 0;
@@ -103,7 +103,7 @@ void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer p
         
         if(ms_blink == 2)
         {
-            led_blink(4);
+            led_blink(gps_config_v.num_blink);
             ms_blink = 0;
         }
         

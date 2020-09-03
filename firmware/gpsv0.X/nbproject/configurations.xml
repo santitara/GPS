@@ -38,7 +38,6 @@
         <itemPath>../src/drv_i2c_static.h</itemPath>
         <itemPath>../src/bmm050_support.h</itemPath>
         <itemPath>../src/libgeohash-master/geohash.h</itemPath>
-        <itemPath>../src/buffer_circular.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f1" displayName="driver" projectFiles="true">
@@ -155,10 +154,6 @@
         <itemPath>../src/main.c</itemPath>
         <itemPath>../src/delay.c</itemPath>
         <itemPath>../src/bmc150.c</itemPath>
-        <itemPath>../src/buffer_circular.c</itemPath>
-      </logicalFolder>
-      <logicalFolder name="fifo" displayName="fifo" projectFiles="true">
-        <itemPath>../src/fifo/fifo.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f1" displayName="driver" projectFiles="true">
@@ -210,7 +205,6 @@
       <logicalFolder name="f3" displayName="gps" projectFiles="true">
         <itemPath>../src/gps/gps_config.c</itemPath>
         <itemPath>../src/gps/gps_uart.c</itemPath>
-        <itemPath>../src/gps/gps_logic.c</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
@@ -440,7 +434,7 @@
         <property key="programoptions.testmodeentrymethod" value="VDDFirst"/>
         <property key="programoptions.usehighvoltageonmclr" value="false"/>
         <property key="programoptions.uselvpprogramming" value="false"/>
-        <property key="voltagevalue" value="3.25"/>
+        <property key="voltagevalue" value="3.375"/>
       </ICD3PlatformTool>
       <PICkit3PlatformTool>
         <property key="ADC 1" value="true"/>

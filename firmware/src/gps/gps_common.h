@@ -49,7 +49,8 @@ typedef enum
     //send data 
     SET_HTTP_FRAME,
     SEND_HTTP_FRAME,
-    
+    ASK_COVERAGE,
+            
     IDLE,
     NEXT_CONFIG_MODULE,        
     WAIT_RESPONSE,
@@ -84,6 +85,7 @@ typedef struct
     uint8_t tout;
     uint8_t flag_get_imei;
     uint8_t flag_gps_report;
+    uint8_t flag_gprs_sent;
     
 }gps_config_lv;
 

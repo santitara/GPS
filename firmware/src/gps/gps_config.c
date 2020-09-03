@@ -578,6 +578,7 @@ void gps_config_at_GPS_reports (void)
             //send msg
             //while(gps_uart_write(GPRS_HTTP_START, sizeof(gps_config_v.msg)) != true);
             //delay_ms(100);
+            gps_config_v.flag_gprs_sent = 1;
             gps_config_v.msg = gps_data_v.data_frame_tx;// GPS_REPORT;
 			while(gps_uart_write(gps_data_v.data_frame_tx, sizeof(gps_config_v.msg)) != true);
             //delay_ms(300);
@@ -597,6 +598,7 @@ void gps_config_at_GPS_reports (void)
             //send msg
 			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
             delay_ms(500);
+            
             //set next state
             gps_config_v.state = WAIT_RESPONSE;//WAIT_RESPONSE;
             //set state ok
@@ -605,6 +607,20 @@ void gps_config_at_GPS_reports (void)
             gps_config_v.state_wrong = SET_GPS_REPORT;
             //set msg expected
             gps_config_v.expect_res = "+HTTPACTION";
+		break;
+        case ASK_COVERAGE:
+			// Set msg to send
+			gps_config_v.msg = AT_CREG;
+			//send msg
+             while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
+            //set next state
+            gps_config_v.state = WAIT_RESPONSE;
+            //set state ok
+            gps_config_v.state_ok = IDLE;
+            //set wrong state
+            gps_config_v.state_wrong = IDLE;
+            //set msg expected
+            gps_config_v.expect_res = OK;
 		break;
         case NEXT_CONFIG_MODULE:
             gps_config_v.state = SET_GPS_REPORT;
@@ -616,7 +632,7 @@ void gps_config_at_GPS_reports (void)
         case IDLE:
             if(gps_config_v.flag_gps_report)
             {
-              
+                gps_config_v.flag_gprs_sent = 0;    
                 gps_config_v.state = SET_GPS_REPORT;
                 gps_config_v.flag_gps_report = 0;
             }
