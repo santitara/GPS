@@ -27,8 +27,6 @@ gps_config_lv gps_config_v =
 	.module_status_bit = 0,
 	.msg_receive = 0,
     .n_retries = 0,
-    .gsm_state = 0,
-    .gps_state = 0,
     .flag_get_imei = 0,
     .flag_gps_report = 0,
 
@@ -438,17 +436,10 @@ void gps_config_at_HTTP(void)
             //set msg expected
             gps_config_v.expect_res = OK;
 		break;
-         case NEXT_CONFIG_MODULE:
+        case NEXT_CONFIG_MODULE:
             appData.state = CONFIG_AT_BT;
             gps_config_v.state = SET_AUTO_PAIR_BT;
-            gps_config_v.gsm_state = 1;
-            //set led off
-            PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,0);
-            // Clear the WDT timer  
-            //SYS_WDT_TimerClear ();
-            //PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,1);
-            DRV_TMR1_Start();  //enciendo el timer 2 que se encarga de manejar el led rojo de la placa
-            
+            gps_config_v.module_status_bit.gprs_state_bit = 1;       
         break; 
         
         case WAIT_RESPONSE:
@@ -581,7 +572,7 @@ void gps_config_at_GPS_reports (void)
             //gps_config_v.flag_gprs_sent = 1;
             gps_config_v.msg = gps_data_v.data_frame_tx;// GPS_REPORT;
 			while(gps_uart_write(gps_data_v.data_frame_tx, sizeof(gps_config_v.msg)) != true);
-            //delay_ms(300);
+            //delay_ms(2000);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;//WAIT_RESPONSE;
             //set state ok
@@ -597,8 +588,7 @@ void gps_config_at_GPS_reports (void)
             gps_config_v.msg = GPRS_HTTP_ACTION;
             //send msg
 			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
-            delay_ms(500);
-            
+            //delay_ms(1000);  
             //set next state
             gps_config_v.state = WAIT_RESPONSE;//WAIT_RESPONSE;
             //set state ok
