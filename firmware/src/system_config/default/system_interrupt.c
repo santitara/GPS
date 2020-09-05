@@ -95,7 +95,7 @@ void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer p
         ms_blink++;
         ms_gps_report++;
        
-        if(ms_gps_report >= 20)
+        if(ms_gps_report >= 10)
         {
             gps_config_v.flag_gps_report = 1;
             ms_gps_report = 0;
@@ -103,7 +103,7 @@ void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer p
         
         if(ms_blink == 2)
         {
-            led_blink(4);
+            led_blink(gps_config_v.num_blink);
             ms_blink = 0;
         }
         
@@ -194,7 +194,8 @@ const char *OKs="OK\r\n";
     static uint8_t index = 0;
     uint8_t * ptr;
     //char *ptr_rx[];
-    
+    static uint8_t n_count = 0;
+    static uint8_t r_count = 0;
     if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_2_RECEIVE))
     {
         /* Make sure receive buffer has data availible */
@@ -212,10 +213,6 @@ const char *OKs="OK\r\n";
                         {
                             gps_uart_v.flag_rx_end = 1;
                         }
-                        else
-                        {
-                            gps_uart_v.index++;
-                        }
                     }
                     //error case
                     else if(gps_uart_v.rx_buffer[(gps_uart_v.index)-2] == 'R')
@@ -230,41 +227,13 @@ const char *OKs="OK\r\n";
                                     {
                                         gps_uart_v.flag_rx_end = 1;
                                     }
-                                    else
-                                    {
-                                        gps_uart_v.index++;
-                                    }
-                                }
-                                else
-                                {
-                                    gps_uart_v.index++;
                                 }
                             }
-                            else
-                            {
-                                gps_uart_v.index++;
-                            }
-                        }
-                        else
-                        {
-                            gps_uart_v.index++;
                         }
                     }
-                    else
-                    {
-                        gps_uart_v.index++;
-                    }
-                }
-                else
-                {
-                    gps_uart_v.index++;
                 }
             }
-            else
-            {
-                gps_uart_v.index++;
-            }
-            
+            gps_uart_v.index++;                       
         }
         PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_2_RECEIVE);
     }

@@ -1,6 +1,7 @@
 /*********include headers***********************************************************/
 #include "stdint.h"
 /*********define *****************************************************************/
+#define BLINK_1  2
 #define BLINK_2  4
 #define BLINK_3  6
 #define BLINK_4  8
@@ -49,7 +50,8 @@ typedef enum
     //send data 
     SET_HTTP_FRAME,
     SEND_HTTP_FRAME,
-    
+    ASK_COVERAGE,
+            
     IDLE,
     NEXT_CONFIG_MODULE,        
     WAIT_RESPONSE,
@@ -61,6 +63,7 @@ typedef struct
 	uint8_t gps_state_bit: 			1;
 	uint8_t gprs_state_bit:			1;
 	uint8_t bt_state_bit:			1;
+    uint8_t web_state_bit:			1;
 }module_status_bit_t;
 
 typedef struct
@@ -75,8 +78,6 @@ typedef struct
     uint8_t test_mode;
     const char *expect_res;
     uint8_t n_retries;
-    uint8_t gsm_state;
-    uint8_t gps_state;
     uint8_t num_blink;
     //uint8_t flag_report;
     uint8_t flag_report_rx;
@@ -84,6 +85,7 @@ typedef struct
     uint8_t tout;
     uint8_t flag_get_imei;
     uint8_t flag_gps_report;
+    uint8_t flag_gprs_sent;
     
 }gps_config_lv;
 
