@@ -103,22 +103,27 @@ void check_led_status(void)
 	gps state = 0 y gsm = 1  -->4 parpadeos
 	gsm state = 0 y gps = 1  -->3 parpadeos
 	gps state = 1 y gsm = 1  -->2 parpadeos
+ *  gps state = 1 , gsm = 1  y web state = 1-->1 parpadeos
  */
-    if(gps_config_v.gsm_state == 0 && gps_config_v.gps_state == 0)
+    if(gps_config_v.module_status_bit.gprs_state_bit == 0 && gps_config_v.module_status_bit.gps_state_bit == 0)
     {
         gps_config_v.num_blink = BLINK_5;
     }
-    else if(gps_config_v.gsm_state == 1 && gps_config_v.gps_state == 0)
+    else if(gps_config_v.module_status_bit.gprs_state_bit == 1 && gps_config_v.module_status_bit.gps_state_bit == 0)
     {
          gps_config_v.num_blink = BLINK_4;
     }
-    else if(gps_config_v.gsm_state == 0 && gps_config_v.gps_state == 1)
+    else if(gps_config_v.module_status_bit.gprs_state_bit == 0 && gps_config_v.module_status_bit.gps_state_bit == 1)
     {
          gps_config_v.num_blink = BLINK_3;
     }
-    else if(gps_config_v.gsm_state == 1 && gps_config_v.gps_state == 1)
+    else if(gps_config_v.module_status_bit.gprs_state_bit == 1 && gps_config_v.module_status_bit.gps_state_bit == 1 && gps_config_v.module_status_bit.web_state_bit == 0)
     {
          gps_config_v.num_blink = BLINK_2;
+    }
+    else if(gps_config_v.module_status_bit.gprs_state_bit == 1 && gps_config_v.module_status_bit.gps_state_bit == 1 && gps_config_v.module_status_bit.web_state_bit == 1)
+    {
+         gps_config_v.num_blink = BLINK_1;
     }
 }
 /*******************************************************************************

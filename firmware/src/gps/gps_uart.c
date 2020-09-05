@@ -9,6 +9,8 @@ const char *UGNSINF0 = "+CGNSINF: 1,0";
 const char *UGNSINF1 = "+CGNSINF: 1,1";
 const char *CREG_OK = "+CREG:0,1";
 const char *CREG_NOK = "+CREG:0,0";
+const char *HTTPACTION_RES = "+HTTPACTION";
+const char *HTTPACTION_OK = "+HTTPACTION: 0,200";
 //#include "string.h"
 
 //#include "stdio.h"
@@ -135,13 +137,24 @@ void gps_uart_rx_state (void)
     {
         gps_config_v.tout = 0;
         gps_config_v.flag_timeout = 0;
+        if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_RES))
+        {
+            if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_OK))
+            {
+                gps_config_v.module_status_bit.web_state_bit = 1;
+            }
+            else
+            {
+                gps_config_v.module_status_bit.web_state_bit = 0;
+            }
+        }
         if (gps_uart_process_response(gps_uart_v.rx_buffer,UGNSINF0))
         {
             gps_config_v.state = gps_config_v.state_ok;
             gps_uart_v.flag_rx_end = 0;
             gps_uart_v.index=0;
             gps_uart_v.ptr = strstr(gps_uart_v.rx_buffer,UGNSINF0);
-            gps_config_v.gps_state = 0;
+            gps_config_v.module_status_bit.gps_state_bit = 0;
             if(gps_uart_v.ptr != NULL)
             {
                 gps_uart_process_GNSINF();
@@ -154,7 +167,7 @@ void gps_uart_rx_state (void)
             gps_config_v.state = gps_config_v.state_ok;
             gps_uart_v.flag_rx_end = 0;
             gps_uart_v.index=0;
-            gps_config_v.gps_state = 1;
+            gps_config_v.module_status_bit.gps_state_bit = 1;
 
             gps_uart_v.ptr = strstr(gps_uart_v.rx_buffer,UGNSINF1);
             if(gps_uart_v.ptr != NULL)
@@ -180,12 +193,13 @@ void gps_uart_rx_state (void)
         {
             if(gps_config_v.flag_gprs_sent)
             {
-                gps_config_v.state = ASK_COVERAGE;
+                //gps_config_v.state = ASK_COVERAGE;
+                gps_config_v.module_status_bit.web_state_bit = 0;
             }
-            else
-            {
+            //else
+            //{
                 gps_config_v.state = gps_config_v.state_wrong;
-            }
+            //}
             
             gps_uart_v.flag_rx_end = 0;
             gps_uart_v.index=0;
@@ -209,6 +223,7 @@ void gps_uart_rx_state (void)
         {
             gps_config_v.state = gps_config_v.state_wrong;
             gps_uart_v.flag_rx_end = 0;
+            gps_uart_v.index=0;
             memset(gps_uart_v.rx_buffer,1,255);
         }
     } 
@@ -307,7 +322,7 @@ void gps_uart_prepare_data_frame(void)  //escribe en trama_tx la URL para enviar
     
     //strcpy(gps_data_v.data_frame_tx,URL_LOCATEC);
     
-    if(gps_config_v.gps_state == 0)
+    if(gps_config_v.module_status_bit.gps_state_bit == 0)
     {  //si el gps no tiene fix preparo los datos 
         strcpy(gps_data_v.lat_s,"0");
         strcpy(gps_data_v.lon_s,"0");

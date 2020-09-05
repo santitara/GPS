@@ -194,7 +194,8 @@ const char *OKs="OK\r\n";
     static uint8_t index = 0;
     uint8_t * ptr;
     //char *ptr_rx[];
-    
+    static uint8_t n_count = 0;
+    static uint8_t r_count = 0;
     if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_2_RECEIVE))
     {
         /* Make sure receive buffer has data availible */
@@ -212,10 +213,6 @@ const char *OKs="OK\r\n";
                         {
                             gps_uart_v.flag_rx_end = 1;
                         }
-                        else
-                        {
-                            gps_uart_v.index++;
-                        }
                     }
                     //error case
                     else if(gps_uart_v.rx_buffer[(gps_uart_v.index)-2] == 'R')
@@ -230,41 +227,13 @@ const char *OKs="OK\r\n";
                                     {
                                         gps_uart_v.flag_rx_end = 1;
                                     }
-                                    else
-                                    {
-                                        gps_uart_v.index++;
-                                    }
-                                }
-                                else
-                                {
-                                    gps_uart_v.index++;
                                 }
                             }
-                            else
-                            {
-                                gps_uart_v.index++;
-                            }
-                        }
-                        else
-                        {
-                            gps_uart_v.index++;
                         }
                     }
-                    else
-                    {
-                        gps_uart_v.index++;
-                    }
-                }
-                else
-                {
-                    gps_uart_v.index++;
                 }
             }
-            else
-            {
-                gps_uart_v.index++;
-            }
-            
+            gps_uart_v.index++;                       
         }
         PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_2_RECEIVE);
     }
