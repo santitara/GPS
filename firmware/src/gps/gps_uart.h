@@ -2,7 +2,7 @@
 #include "stdint.h"
 #define BUFF_SIZE_TX    255
 #define BUFF_SIZE_RX    255
-#define MSG_TO_SEND     2
+#define MSG_TO_SEND     1
 /*********pubic enum***************************************************************/
 
 

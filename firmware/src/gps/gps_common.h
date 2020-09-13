@@ -7,6 +7,7 @@
 #define BLINK_4  8
 #define BLINK_5  10
 #define SIZE_CIRC_BUFF 100
+#define SIZE_BUF_POST_TX 700
 
 /*********public enum***************************************************************/
 typedef enum
@@ -49,7 +50,9 @@ typedef enum
     PROCESS_REPORT_GPS_BT,
     //send data 
     SET_HTTP_FRAME,
+    SET_HTTP_DATA_POST,
     SEND_HTTP_FRAME,
+    SET_HTTP_READ,
     ASK_COVERAGE,
             
     IDLE,
@@ -57,6 +60,12 @@ typedef enum
     WAIT_RESPONSE,
 }general_conf_states_e;
 
+typedef enum
+{
+    GET = 0,
+    POST,
+          
+}http_method_type_e;
 /*********public struct***********************************************************/
 typedef struct 
 {
@@ -86,7 +95,7 @@ typedef struct
     uint8_t flag_get_imei;
     uint8_t flag_gps_report;
     uint8_t flag_gprs_sent;
-    
+    http_method_type_e http_method;    
 }gps_config_lv;
 
 typedef struct
@@ -101,6 +110,7 @@ typedef struct
    char speed_s[12];
    uint8_t msg_num;
    char imei[20];
+   uint8_t data_post_tx[SIZE_BUF_POST_TX];
 }gps_data_lv;
 
 // The hidden definition of our circular buffer structure

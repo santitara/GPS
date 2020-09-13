@@ -10,7 +10,8 @@ const char *UGNSINF1 = "+CGNSINF: 1,1";
 const char *CREG_OK = "+CREG:0,1";
 const char *CREG_NOK = "+CREG:0,0";
 const char *HTTPACTION_RES = "+HTTPACTION";
-const char *HTTPACTION_OK = "+HTTPACTION: 0,200";
+const char *HTTPACTION_OK_GET = "+HTTPACTION: 0,200";
+const char *HTTPACTION_OK_POST = "+HTTPACTION: 1,200";
 //#include "string.h"
 
 //#include "stdio.h"
@@ -59,7 +60,8 @@ const char *VAR_UD_MED ="ud_med=";
 const char *SEPARATOR= "&";
 const char *URL_TERMINATOR ="\"\r\n";
 //POST
-//const char *URL_ST_TRACKER_GRAFANA2 = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=865067021287761\"\n\r";
+const char *URL_ST_TRACKER_GRAFANA_POST = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=865067021287761\"\n\r";
+//const char *URL_ST_TRACKER_GRAFANA_POST = "AT+HTTPPARA=\"URL\",\"https://httpbin.org/post\"\n\r";
 //GET
 const char *URL_ST_TRACKER_GRAFANA2_1 = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=";
 const char *URL_ST_TRACKER_GRAFANA2_2 ="&payload=";
@@ -77,6 +79,14 @@ const char *TRAMA_END = "}]\"\r\n";
  
 const char *URL_TEST = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=867717038251048&payload=[{%22fields%22:{%22latitude%22:39.262280,%22longitude:%22-1.913421},%22timestamp%22:1598872665},{%22fields%22:{%22latitude%22:39.262280,%22longitude%22:-1.913421},%22timestamp%22:1598872667},{%22fields%22:{%22latitude%22:39.262280,%22longitude%22:-1.913421},%22timestamp%22:1598872669}]\"\r\n"; 
 
+
+//POST
+ const char *TRAMA_INI_POST = "[";
+ //const char *TRAMA_LAT = "{\"fields\": {\"latitude\":";
+ //const char *TRAMA_LON =",\"longitude\":";
+ //const char *TRAMA_TIMESTAMP ="},\"tags\": {},\"timestamp\":";
+ //const char *TRAMA_NEXT = "},";
+ const char *TRAMA_END_POST = "}]";
 /*********private functions prototype***********************************************************/
 void gps_uart_get_time(char *date);
 void gps_uart_get_latitude(char *data);
@@ -139,13 +149,27 @@ void gps_uart_rx_state (void)
         gps_config_v.flag_timeout = 0;
         if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_RES))
         {
-            if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_OK))
+            if(gps_config_v.http_method == GET)
             {
-                gps_config_v.module_status_bit.web_state_bit = 1;
+                if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_OK_GET))
+                {
+                    gps_config_v.module_status_bit.web_state_bit = 1;
+                }
+                else
+                {
+                    gps_config_v.module_status_bit.web_state_bit = 0;
+                }
             }
-            else
+            else    //POST
             {
-                gps_config_v.module_status_bit.web_state_bit = 0;
+                if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_OK_POST))
+                {
+                    gps_config_v.module_status_bit.web_state_bit = 1;
+                }
+                else
+                {
+                    gps_config_v.module_status_bit.web_state_bit = 0;
+                }
             }
         }
         if (gps_uart_process_response(gps_uart_v.rx_buffer,UGNSINF0))
@@ -337,32 +361,69 @@ void gps_uart_prepare_data_frame(void)  //escribe en trama_tx la URL para enviar
     if(gps_data_v.msg_num == 0)
     {
         memset(gps_data_v.data_frame_tx,0,255);
+        
+        //strcpy(gps_data_v.data_frame_tx,URL_ST_TRACKER_GRAFANA_POST);
         strcpy(gps_data_v.data_frame_tx,URL_ST_TRACKER_GRAFANA2_1);
         strcat(gps_data_v.data_frame_tx,gps_data_v.imei);
-        strcat(gps_data_v.data_frame_tx,URL_ST_TRACKER_GRAFANA2_2);
-        strcat(gps_data_v.data_frame_tx,TRAMA_INI); 
+        if(gps_config_v.http_method == GET)
+        {
+            strcat(gps_data_v.data_frame_tx,URL_ST_TRACKER_GRAFANA2_2);
+            strcat(gps_data_v.data_frame_tx,TRAMA_INI);
+        }
+        else //POST
+        {
+            memset(gps_data_v.data_post_tx,0,SIZE_BUF_POST_TX);
+            strcat(gps_data_v.data_frame_tx,"\"\r\n");
+            strcpy(gps_data_v.data_post_tx,TRAMA_INI_POST);
+        }
     }
-    
-    strcat(gps_data_v.data_frame_tx,TRAMA_GEO);
-    strcat(gps_data_v.data_frame_tx,gps_data_v.lat_s);
+    if(gps_config_v.http_method == GET)
+    {
+        strcat(gps_data_v.data_frame_tx,TRAMA_GEO);
+        strcat(gps_data_v.data_frame_tx,gps_data_v.lat_s);
 
-    strcat(gps_data_v.data_frame_tx,TRAMA_GEO2);
-    strcat(gps_data_v.data_frame_tx,gps_data_v.lon_s);
+        strcat(gps_data_v.data_frame_tx,TRAMA_GEO2);
+        strcat(gps_data_v.data_frame_tx,gps_data_v.lon_s);
 
-    strcat(gps_data_v.data_frame_tx,TRAMA_TIMESTAMP);
-    strcat(gps_data_v.data_frame_tx,gps_data_v.time_stamp);
+        strcat(gps_data_v.data_frame_tx,TRAMA_TIMESTAMP);
+        strcat(gps_data_v.data_frame_tx,gps_data_v.time_stamp);
+    }
+    else
+    {
+        strcat(gps_data_v.data_post_tx,TRAMA_GEO);
+        strcat(gps_data_v.data_post_tx,gps_data_v.lat_s);
+
+        strcat(gps_data_v.data_post_tx,TRAMA_GEO2);
+        strcat(gps_data_v.data_post_tx,gps_data_v.lon_s);
+
+        strcat(gps_data_v.data_post_tx,TRAMA_TIMESTAMP);
+        strcat(gps_data_v.data_post_tx,gps_data_v.time_stamp); 
+    }
         
     if(gps_data_v.msg_num == MSG_TO_SEND)
     {
-        strcat(gps_data_v.data_frame_tx,TRAMA_END);
-        //memset(gps_data_v.data_frame_tx,0,255);
-        //strcpy(gps_data_v.data_frame_tx,URL_TEST);
-        
+        if(gps_config_v.http_method == GET)
+        {
+            strcat(gps_data_v.data_frame_tx,TRAMA_END);
+            //memset(gps_data_v.data_frame_tx,0,255);
+            //strcpy(gps_data_v.data_frame_tx,URL_TEST);
+        }
+        else //POST
+        {
+            strcat(gps_data_v.data_post_tx,TRAMA_END_POST);
+        }
         gps_data_v.msg_num = 0;
     }
     else
     {
-        strcat(gps_data_v.data_frame_tx,TRAMA_NEXT);
+        if(gps_config_v.http_method == GET)
+        {
+            strcat(gps_data_v.data_frame_tx,TRAMA_NEXT);
+        }
+        else //POST
+        {
+            strcat(gps_data_v.data_post_tx,TRAMA_NEXT);
+        }
         gps_data_v.msg_num++;
         gps_config_v.state = IDLE;
     }
