@@ -6,7 +6,7 @@
      const char *ECHO_OFF = "ATE0\r\n";
      const char *AT_CREG = "AT+CREG?\r\n";
      const char *AT_FACTORY = "AT&F0\r\n";
-     const char *BAUDRATE_SEL = "AT+IPR=115200\r\n";
+     const char *BAUDRATE_SEL = "AT+IPR=57600\r\n";
      const char *AT_OFF = "AT+CPOWD=1\r\n";
      const char *GET_IMEI = "AT+GSN\r\n";
      //GPS
@@ -36,7 +36,9 @@
     // COMANDOS PARA MANEJAR EL HTTP
     const char *GPRS_HTTP_CLOSE = "AT+HTTPTERM\r\n";
     const char *GPRS_HTTP_START = "AT+HTTPINIT\r\n";
-    const char *GPRS_HTTP_ACTION = "AT+HTTPACTION=0\r\n";   //POST->1; GET->0
+    const char *GPRS_HTTP_ACTION_GET = "AT+HTTPACTION=0\r\n"; //GET->0
+    const char *GPRS_HTTP_ACTION_POST = "AT+HTTPACTION=1\r\n";//POST->1
+    const char *GPRS_HTTP_DATA_POST = "AT+HTTPDATA=1500,1000\r\n";//POST->1
     const char *GPRS_HTTP_READ = "AT+HTTPREAD\r\n";
     const char *CID_SEL = "AT+HTTPPARA=\"CID\",1\r\n";
     const char *SSL_ENABLE="AT+HTTPSSL=1\r\n";
