@@ -1,8 +1,16 @@
+#ifndef _GPS_UART_H    /* Guard against multiple inclusion */
+#define _GPS_UART_H
 /*********include headers***********************************************************/
 #include "stdint.h"
+/* Provide C++ Compatibility */
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
+
 #define BUFF_SIZE_TX    255
 #define BUFF_SIZE_RX    255
-#define MSG_TO_SEND     1
+#define MSG_TO_SEND     15
 /*********pubic enum***************************************************************/
 
 
@@ -26,3 +34,12 @@ extern gps_uart_t gps_uart_v;;
 
 uint8_t gps_uart_process_response(uint8_t * buff, const char *check_msg);
 void gps_uart_rx_state (void);
+void gps_uart_prepare_url_post(void);
+
+    /* Provide C++ Compatibility */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _GPS_UART_H */
+

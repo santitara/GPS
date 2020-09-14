@@ -1,6 +1,12 @@
-/*********include headers***********************************************************/
+#ifndef _GPS_CONFIG_H    /* Guard against multiple inclusion */
+#define _GPS_CONFIG_H
 
+/*********include headers***********************************************************/
 #include "stdint.h"
+/* Provide C++ Compatibility */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*********define *****************************************************************/
 
@@ -25,3 +31,9 @@ void    gps_config_at_GPS_reports       (void);
 
 
 
+    /* Provide C++ Compatibility */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _GPS_CONFIG_H */

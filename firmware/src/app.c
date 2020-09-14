@@ -62,23 +62,23 @@ void APP_Tasks ( void )
     switch(appData.state)
     {
         case CONFIG_AT_MODULE:
-            delay_ms(1000);
+            delay_ms(500);
             gps_config_at_general();
         break;
         case CONFIG_AT_GPS:
-            delay_ms(1000);
+            delay_ms(500);
             gps_config_at_GPS();
         break;
         case CONFIG_AT_GPRS:
-            delay_ms(1000);
+            delay_ms(500);
             gps_config_at_GRPS();
         break;
         case CONFIG_AT_HTTP:
-            delay_ms(1000);
+            delay_ms(500);
             gps_config_at_HTTP();
         break;
          case CONFIG_AT_BT:
-            delay_ms(1000);
+            delay_ms(500);
             gps_config_at_BT();
         break;
         case CONFIG_AT_END:
