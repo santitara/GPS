@@ -188,6 +188,21 @@ typedef enum
     CONFIG_AT_END,   
 } app_states_e;
 
+typedef struct 
+{
+	uint8_t gps_state_bit: 			1;
+	uint8_t gprs_state_bit:			1;
+	uint8_t bt_state_bit:			1;
+    uint8_t web_state_bit:			1;
+}module_status_bit_t;
+
+typedef struct
+{
+    uint8_t num_blink;
+    module_status_bit_t module_status_bit;   
+}led_control_t;
+
+extern led_control_t led_control_v;
 
 // *****************************************************************************
 /* Application Data

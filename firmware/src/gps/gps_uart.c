@@ -2,6 +2,7 @@
 #include "gps_uart.h"
 #include "app.h"
 #include "gps_common.h"
+#include "gps_config.h"
 #include "time.h"
 
 const char *ERR = "ERROR";
@@ -21,6 +22,7 @@ const char *HTTPACTION_OK_POST = "+HTTPACTION: 1,200";
 
 /*********private struct***********************************************************/
 struct tm tm_str;
+
 gps_data_lv gps_data_v = 
 {
     .msg_num = 0,
@@ -146,7 +148,7 @@ void gps_uart_rx_state (void)
     //ret = strstr(buff,check_msg); 
     if(gps_uart_v.flag_rx_end)
     {
-        gps_config_v.tout = 0;
+        gps_config_v.counter_tout = 0;
         gps_config_v.flag_timeout = 0;
         if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_RES))
         {
@@ -154,22 +156,22 @@ void gps_uart_rx_state (void)
             {
                 if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_OK_GET))
                 {
-                    gps_config_v.module_status_bit.web_state_bit = 1;
+                    led_control_v.module_status_bit.web_state_bit = 1;
                 }
                 else
                 {
-                    gps_config_v.module_status_bit.web_state_bit = 0;
+                    led_control_v.module_status_bit.web_state_bit = 0;
                 }
             }
             else    //POST
             {
                 if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_OK_POST))
                 {
-                    gps_config_v.module_status_bit.web_state_bit = 1;
+                    led_control_v.module_status_bit.web_state_bit = 1;
                 }
                 else
                 {
-                    gps_config_v.module_status_bit.web_state_bit = 0;
+                    led_control_v.module_status_bit.web_state_bit = 0;
                 }
             }
         }
@@ -179,7 +181,7 @@ void gps_uart_rx_state (void)
             gps_uart_v.flag_rx_end = 0;
             gps_uart_v.index=0;
             gps_uart_v.ptr = strstr(gps_uart_v.rx_buffer,UGNSINF0);
-            gps_config_v.module_status_bit.gps_state_bit = 0;
+            led_control_v.module_status_bit.gps_state_bit = 0;
             if(gps_uart_v.ptr != NULL)
             {
                 gps_uart_process_GNSINF();
@@ -192,7 +194,7 @@ void gps_uart_rx_state (void)
             gps_config_v.state = gps_config_v.state_ok;
             gps_uart_v.flag_rx_end = 0;
             gps_uart_v.index=0;
-            gps_config_v.module_status_bit.gps_state_bit = 1;
+            led_control_v.module_status_bit.gps_state_bit = 1;
 
             gps_uart_v.ptr = strstr(gps_uart_v.rx_buffer,UGNSINF1);
             if(gps_uart_v.ptr != NULL)
@@ -219,7 +221,7 @@ void gps_uart_rx_state (void)
             if(gps_config_v.flag_gprs_sent)
             {
                 //gps_config_v.state = ASK_COVERAGE;
-                gps_config_v.module_status_bit.web_state_bit = 0;
+                led_control_v.module_status_bit.web_state_bit = 0;
             }
             //else
             //{
@@ -257,7 +259,7 @@ void gps_uart_rx_state (void)
         if(gps_config_v.flag_timeout == 1)
         {
             gps_config_v.state = gps_config_v.state_wrong;
-            gps_config_v.tout = 0;
+            gps_config_v.counter_tout = 0;
             gps_config_v.flag_timeout = 0;
         }
     }
@@ -347,7 +349,7 @@ void gps_uart_prepare_data_frame(void)  //escribe en trama_tx la URL para enviar
     
     //strcpy(gps_data_v.data_frame_tx,URL_LOCATEC);
     
-    if(gps_config_v.module_status_bit.gps_state_bit == 0)
+    if(led_control_v.module_status_bit.gps_state_bit == 0)
     {  //si el gps no tiene fix preparo los datos 
         strcpy(gps_data_v.lat_s,"0");
         strcpy(gps_data_v.lon_s,"0");
@@ -443,15 +445,14 @@ void gps_uart_process_GNSINF(void)
     gps_uart_get_speed(ptr_data_gps);
 
     gps_uart_prepare_data_frame();
-    gps_buff_c_ptr_v.head++;
 }
 
 void gps_uart_prepare_url_post(void)
 {
-    memset(gps_data_v.data_post_tx,0,SIZE_BUF_POST_TX);
+    memset(gps_data_v.url_post_tx,0,SIZE_BUF_POST_TX);
     //strcpy(gps_data_v.data_frame_tx,URL_ST_TRACKER_GRAFANA_POST);
-    strcpy(gps_data_v.data_post_tx,URL_ST_TRACKER_GRAFANA2_1);
-    strcat(gps_data_v.data_post_tx,gps_data_v.imei);
-    strcat(gps_data_v.data_post_tx,"\"\r\n");
+    strcpy(gps_data_v.url_post_tx,URL_ST_TRACKER_GRAFANA2_1);
+    strcat(gps_data_v.url_post_tx,gps_data_v.imei);
+    strcat(gps_data_v.url_post_tx,"\"\r\n");
 }
 

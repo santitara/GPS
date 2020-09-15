@@ -34,6 +34,11 @@
 #include "gps/gps_config.h"
 #include "gps/gps_common.h"
 
+#define BLINK_1  2
+#define BLINK_2  4
+#define BLINK_3  6
+#define BLINK_4  8
+#define BLINK_5  10
 
 //****************************************************************************
 DRV_HANDLE flash_spi_handle;
@@ -47,6 +52,11 @@ DRV_SST25VF064C_COMMAND_STATUS f_status;
 APP_DATA appData;
 //*****************************************************************************
 
+led_control_t led_control_v = 
+{
+    .num_blink = 0,
+    .module_status_bit = 0,        
+};
 void APP_Initialize ( void )
 {  
     gps_config_init_module ();
@@ -105,25 +115,25 @@ void check_led_status(void)
 	gps state = 1 y gsm = 1  -->2 parpadeos
  *  gps state = 1 , gsm = 1  y web state = 1-->1 parpadeos
  */
-    if(gps_config_v.module_status_bit.gprs_state_bit == 0 && gps_config_v.module_status_bit.gps_state_bit == 0)
+    if(led_control_v.module_status_bit.gprs_state_bit == 0 && led_control_v.module_status_bit.gps_state_bit == 0)
     {
-        gps_config_v.num_blink = BLINK_5;
+        led_control_v.num_blink = BLINK_5;
     }
-    else if(gps_config_v.module_status_bit.gprs_state_bit == 1 && gps_config_v.module_status_bit.gps_state_bit == 0)
+    else if(led_control_v.module_status_bit.gprs_state_bit == 1 && led_control_v.module_status_bit.gps_state_bit == 0)
     {
-         gps_config_v.num_blink = BLINK_4;
+         led_control_v.num_blink = BLINK_4;
     }
-    else if(gps_config_v.module_status_bit.gprs_state_bit == 0 && gps_config_v.module_status_bit.gps_state_bit == 1)
+    else if(led_control_v.module_status_bit.gprs_state_bit == 0 && led_control_v.module_status_bit.gps_state_bit == 1)
     {
-         gps_config_v.num_blink = BLINK_3;
+         led_control_v.num_blink = BLINK_3;
     }
-    else if(gps_config_v.module_status_bit.gprs_state_bit == 1 && gps_config_v.module_status_bit.gps_state_bit == 1 && gps_config_v.module_status_bit.web_state_bit == 0)
+    else if(led_control_v.module_status_bit.gprs_state_bit == 1 && led_control_v.module_status_bit.gps_state_bit == 1 && led_control_v.module_status_bit.web_state_bit == 0)
     {
-         gps_config_v.num_blink = BLINK_2;
+         led_control_v.num_blink = BLINK_2;
     }
-    else if(gps_config_v.module_status_bit.gprs_state_bit == 1 && gps_config_v.module_status_bit.gps_state_bit == 1 && gps_config_v.module_status_bit.web_state_bit == 1)
+    else if(led_control_v.module_status_bit.gprs_state_bit == 1 && led_control_v.module_status_bit.gps_state_bit == 1 && led_control_v.module_status_bit.web_state_bit == 1)
     {
-         gps_config_v.num_blink = BLINK_1;
+         led_control_v.num_blink = BLINK_1;
     }
 }
 /*******************************************************************************

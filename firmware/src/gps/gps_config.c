@@ -14,6 +14,8 @@ const char *t = "[{%22fields%22:{%22latitude%22:39.262477,%22longitude%22:-1.913
 //const char *UGNSINF1 = "+CGNSINF: 1,1";
 /*********private enum***************************************************************/
 
+
+
 /*********private functions prototype***********************************************************/
 uint8_t gps_config_test_mode (void);
 /*********public functions prototype***********************************************************/
@@ -24,21 +26,11 @@ void gps_config_ON_OFF_module(void);
 gps_config_lv gps_config_v =
 {
 	.state = START_AT_CONFIG,
-	.gps_enable = 0,
-	.module_status_bit = 0,
-	.msg_receive = 0,
     .n_retries = 0,
     .flag_get_imei = 0,
     .flag_gps_report = 0,
     .http_method = POST,
 
-};
-
-gps_buff_c_ptr_lv gps_buff_c_ptr_v = 
-{
-    .head = 0,
-    .tail = 0,
-    .max = 0,
 };
 
 void gps_config_init_module (void)
@@ -449,7 +441,7 @@ void gps_config_at_HTTP(void)
            //send msg
            //configure gps_data_post_tx with url 
            gps_uart_prepare_url_post();
-           gps_config_v.msg = gps_data_v.data_post_tx;
+           gps_config_v.msg = gps_data_v.url_post_tx;
            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
            //set next state
            gps_config_v.state = NEXT_CONFIG_MODULE;
@@ -463,7 +455,7 @@ void gps_config_at_HTTP(void)
         case NEXT_CONFIG_MODULE:
             appData.state = CONFIG_AT_BT;
             gps_config_v.state = SET_AUTO_PAIR_BT;
-            gps_config_v.module_status_bit.gprs_state_bit = 1;       
+            led_control_v.module_status_bit.gprs_state_bit = 1;       
         break; 
         
         case WAIT_RESPONSE:
