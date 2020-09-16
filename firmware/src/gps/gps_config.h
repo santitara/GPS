@@ -1,6 +1,23 @@
+/**
+ *******************************************************************************
+ * @file gps_config.h
+ * @author slopez
+ * @version 1.0.0
+ * @date Creation: 28/05/2020
+ * @date Last modification: 28/05/2020
+ * @brief gps config header file. Includin dependences and comon functions and structures
+ *******************************************************************************
+
+    @addtogroup GPS 
+    @{
+    @defgroup GPS CONFIG header file
+    @{
+    @brief
+    @details
+
+*/
 #ifndef _GPS_CONFIG_H    /* Guard against multiple inclusion */
 #define _GPS_CONFIG_H
-
 /*********include headers***********************************************************/
 #include "stdint.h"
 /* Provide C++ Compatibility */
@@ -9,7 +26,8 @@ extern "C" {
 #endif
 
 /*********define *****************************************************************/
-
+#define GPS_REPORTS_FREQ        10  //!in dsec
+#define GPS_COMMS_TOUT          5   //!in sec
 
 /*********public enum***************************************************************/
     
@@ -100,9 +118,6 @@ void    gps_config_at_HTTP              (void);
 void    gps_config_at_BT                (void);
 void    gps_config_at_GPS_reports       (void);
 /*********public variables***********************************************************/
-//extern gps_config_lv gps_config_v;
-
-
 
     /* Provide C++ Compatibility */
 #ifdef __cplusplus

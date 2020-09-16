@@ -1,10 +1,24 @@
-/*********include headers***********************************************************/
+/**
+ *******************************************************************************
+ * @file gps_uart.C
+ * @author slopez
+ * @version 1.0.0
+ * @date Creation: 28/05/2020
+ * @date Last modification: 28/05/2020
+ * @brief gps uart.c Procesing all data bytes of UART comms
+ *******************************************************************************
+
+    @addtogroup GPS UART
+    @{
+
+*/
+/* Includes ------------------------------------------------------------------*/
 #include "gps_uart.h"
 #include "app.h"
 #include "gps_common.h"
 #include "gps_config.h"
 #include "time.h"
-
+/* Const vars ----------------------------------------------------------------*/    
 const char *ERR = "ERROR";
 const char *UGNSINF0 = "+CGNSINF: 1,0";
 const char *UGNSINF1 = "+CGNSINF: 1,1";
@@ -13,31 +27,16 @@ const char *CREG_NOK = "+CREG:0,0";
 const char *HTTPACTION_RES = "+HTTPACTION";
 const char *HTTPACTION_OK_GET = "+HTTPACTION: 0,200";
 const char *HTTPACTION_OK_POST = "+HTTPACTION: 1,200";
-//#include "string.h"
-
-//#include "stdio.h"
-
-
-/*********private enum***************************************************************/
-
-/*********private struct***********************************************************/
-struct tm tm_str;
-
-gps_data_lv gps_data_v = 
-{
-    .msg_num = 0,
-};
-gps_uart_t gps_uart_v;
 //etiquetas del gps
- const char *VAR_DEV ="dev=";
- const char *VAR_LAT ="lat=";
- const char *VAR_LON ="lng=";
- const char *VAR_VEL ="vel=";
- const char *VAR_TS ="ts=";
- //etiquetas de la potencia tronic
- const char *VAR_NPANT="n_pant=";
- //pantalla logo
- const char *VAR_NLOGO ="n_logo=";
+const char *VAR_DEV ="dev=";
+const char *VAR_LAT ="lat=";
+const char *VAR_LON ="lng=";
+const char *VAR_VEL ="vel=";
+const char *VAR_TS ="ts=";
+//etiquetas de la potencia tronic
+const char *VAR_NPANT="n_pant=";
+//pantalla logo
+const char *VAR_NLOGO ="n_logo=";
  //pantalla principal
 const char *VAR_DEP ="depo=";
 const char *VAR_CAU ="caud=";
@@ -76,37 +75,48 @@ const char *TRAMA_GEO3 = "},%22tags%22:{},%22timestamp%22:null";
 const char *TRAMA_TIMESTAMP ="},%22timestamp%22:";
 const char *TRAMA_NEXT = "},";
 const char *TRAMA_END = "}]\"\r\n";
- 
-// const char *URL_ST_TRACKER_GRAFANA2 = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=865067028187128&payload=[{%22fields%22:{%22latitude%22:39.178832,%22longitude%22:-0.241623},%22tags%22:{},%22timestamp%22:123456789";
- 
-const char *URL_TEST = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=867717038251048&payload=[{%22fields%22:{%22latitude%22:39.262280,%22longitude:%22-1.913421},%22timestamp%22:1598872665},{%22fields%22:{%22latitude%22:39.262280,%22longitude%22:-1.913421},%22timestamp%22:1598872667},{%22fields%22:{%22latitude%22:39.262280,%22longitude%22:-1.913421},%22timestamp%22:1598872669}]\"\r\n"; 
 
-
+const char *URL_TEST = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=867717038251048&payload=[{%22fields%22:{%22latitude%22:39.262280,%22longitude:%22-1.913421},%22timestamp%22:1598872665},{%22fields%22:{%22latitude%22:39.262280,%22longitude%22:-1.913421},%22timestamp%22:1598872667},{%22fields%22:{%22latitude%22:39.262280,%22longitude%22:-1.913421},%22timestamp%22:1598872669}]\"\r\n";
 //POST
- const char *TRAMA_INI_POST = "[";
- const char *TRAMA_LAT_POST = "{\"fields\": {\"latitude\":";
- const char *TRAMA_LON_POST =",\"longitude\":";
- const char *TRAMA_TIMESTAMP_POST ="},\"tags\": {},\"timestamp\":";
- //const char *TRAMA_NEXT = "},";
- const char *TRAMA_END_POST = "}]";
+const char *TRAMA_INI_POST = "[";
+const char *TRAMA_LAT_POST = "{\"fields\": {\"latitude\":";
+const char *TRAMA_LON_POST =",\"longitude\":";
+const char *TRAMA_TIMESTAMP_POST ="},\"tags\": {},\"timestamp\":";
+const char *TRAMA_END_POST = "}]";
+/*********private enum***************************************************************/
+
+/*********private struct***********************************************************/
+struct tm tm_str;
+
+gps_data_lv gps_data_v = 
+{
+    .msg_num = 0,
+};
+
+gps_uart_t gps_uart_v;
+
+
 /*********private functions prototype***********************************************************/
-void gps_uart_get_time(char *date);
-void gps_uart_get_latitude(char *data);
-void gps_uart_get_longitude(char *data);
-void gps_uart_get_speed(char *data);
-void gps_uart_prepare_data_frame(void);
-void gps_uart_process_GNSINF(void);
-void gps_uart_get_url_post(void);
+void gps_uart_get_time              (char *date);
+void gps_uart_get_latitude          (char *data);
+void gps_uart_get_longitude         (char *data);
+void gps_uart_get_speed             (char *data);
+void gps_uart_prepare_data_frame    (void);
+void gps_uart_process_GNSINF        (void);
+void gps_uart_get_url_post          (void);
 /*********private vars***************************************************************/
 
+/**
+ * @brief gps uart write. Write bytes in UART port
+ * @param[in] char pointer, size of data to send 
+ * @return bool var. true when finish false while not send all bytes
+ */
 bool gps_uart_write(char *data, uint8_t size)
 {
-    uint8_t a = 0;
     if(*gps_config_v.msg == '\0')
     {
         return true;
     }
-
     /* Write a character at a time, only if transmitter is empty */
     while (PLIB_USART_TransmitterIsEmpty(USART_ID_2))
     {
@@ -118,32 +128,42 @@ bool gps_uart_write(char *data, uint8_t size)
 
         if(*gps_config_v.msg == '\0')
         {
-            a = 1;
             return true;
         }
     }
     return false;
 }
 
-
-
-uint8_t gps_uart_process_response(uint8_t *buff, const char *check_msg)
+/**
+ * @brief gps uart process response. Check data received from uart with expected
+ * message
+ * @param[in] uint8_t *buff. Buffer with data receivd,
+ * @param[in ]const char *check_msg, msg to compare buff 
+ * @return bool var. true when msg to chec is match, false when not
+ */
+bool gps_uart_process_response(uint8_t *buff, const char *check_msg)
 {
     char* ret = 0;
     ret = strstr(buff,check_msg);
     if(ret != NULL)
     {
-      return 1;
+      return true;
     }
     else
     {
-        return 0;
+        return false;
     }
 }
 
+/**
+ * @brief gps uart rx state. Function to process all data info received
+ * message
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void gps_uart_rx_state (void)
 {
-   
     char* ret = 0; 
     //ret = strstr(buff,check_msg); 
     if(gps_uart_v.flag_rx_end)
@@ -266,6 +286,14 @@ void gps_uart_rx_state (void)
 
 }
 
+/**
+ * @brief gps uart get time. Funtion to convert time of gps module obtained in 
+ * timestampo to send to web server
+ * message
+ * @param[in] char *date, date received from gps module in format AAAAMMDDHHMMSS
+ * @param[out]none
+ * @return none
+ */
 void gps_uart_get_time(char *date)
 {
     char date2[20]={0};
@@ -292,21 +320,42 @@ void gps_uart_get_time(char *date)
     time_t t = mktime( &tm_str );
 
     itoa(gps_data_v.time_stamp,t,10);
+    
 }
 
+/**
+ * @brief gps uart get latitude. Function get latitude from data frame of gps module
+ * message
+ * @param[in] char *data, pontier to char of data frame
+ * @param[out]none
+ * @return none
+ */
 void gps_uart_get_latitude(char *data)
 {
     strcpy(gps_data_v.lat_s,data);
     gps_data_v.lat = atof(data);
     
 }
-
+/**
+ * @brief gps uart get longitude. Function get longitude from data frame of gps module
+ * message
+ * @param[in] char *data, pontier to char of data frame
+ * @param[out]none
+ * @return none
+ */
 void gps_uart_get_longitude(char *data)
 {
     strcpy(gps_data_v.lon_s,data);
     gps_data_v.longi =atof(data);
 }
 
+/**
+ * @brief gps uart get speed. Function get speed from data frame of gps module
+ * message
+ * @param[in] char *data, pontier to char of data frame
+ * @param[out]none
+ * @return none
+ */
 void gps_uart_get_speed(char *data)
 {
 	strcpy(gps_data_v.speed_s,data);																				  
@@ -343,12 +392,16 @@ void gps_uart_get_speed(char *data)
         }
     }*/
 }
-    
-void gps_uart_prepare_data_frame(void)  //escribe en trama_tx la URL para enviar al server
+
+/**
+ * @brief gps uart prepare data frame. Function to implement data frame to send 
+ * to web server.
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
+void gps_uart_prepare_data_frame(void)
 {            
-    
-    //strcpy(gps_data_v.data_frame_tx,URL_LOCATEC);
-    
     if(led_control_v.module_status_bit.gps_state_bit == 0)
     {  //si el gps no tiene fix preparo los datos 
         strcpy(gps_data_v.lat_s,"0");
@@ -356,11 +409,7 @@ void gps_uart_prepare_data_frame(void)  //escribe en trama_tx la URL para enviar
         strcpy(gps_data_v.speed_s,"0");
         strcpy(gps_data_v.time_stamp,"null");
     }
-    //to test, predefined data frame
-    /*memset(gps_data_v.data_frame_tx,0,255);
-    strcpy(gps_data_v.data_frame_tx,URL_ST_TRACKER_GRAFANA2);
-    strcat(gps_data_v.data_frame_tx,TRAMA_END);  
-    */
+    
     if(gps_data_v.msg_num == 0)
     {
         memset(gps_data_v.data_frame_tx,0,SIZE_BUF_DATA_TX);
@@ -405,8 +454,6 @@ void gps_uart_prepare_data_frame(void)  //escribe en trama_tx la URL para enviar
         if(gps_config_v.http_method == GET)
         {
             strcat(gps_data_v.data_frame_tx,TRAMA_END);
-            //memset(gps_data_v.data_frame_tx,0,255);
-            //strcpy(gps_data_v.data_frame_tx,URL_TEST);
         }
         else //POST
         {
@@ -416,14 +463,20 @@ void gps_uart_prepare_data_frame(void)  //escribe en trama_tx la URL para enviar
     }
     else
     {
-       
         strcat(gps_data_v.data_frame_tx,TRAMA_NEXT);
         gps_data_v.msg_num++;
         gps_config_v.state = IDLE;
     }  
 }
 
-
+/**
+ * @brief gps uart process GNSINF. Function to extract data from frame of gps module
+ * latitude, longitude, speed, timestamp...
+ * to web server.
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void gps_uart_process_GNSINF(void)
 {
     char *ptr_data_gps;
@@ -447,6 +500,12 @@ void gps_uart_process_GNSINF(void)
     gps_uart_prepare_data_frame();
 }
 
+/**
+ * @brief gps uart prepare url POST. Configure and set url to POST msg
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void gps_uart_prepare_url_post(void)
 {
     memset(gps_data_v.url_post_tx,0,SIZE_BUF_POST_TX);

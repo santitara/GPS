@@ -1,4 +1,18 @@
-/*********include headers***********************************************************/
+/**
+ *******************************************************************************
+ * @file gps_config.c
+ * @author slopez
+ * @version 1.0.0
+ * @date Creation: 28/05/2020
+ * @date Last modification: 28/05/2020
+ * @brief gps config.c Cofigure gps simcom module.
+ *******************************************************************************
+
+    @addtogroup GPS CONFIG
+    @{
+
+*/
+/* Includes ------------------------------------------------------------------*/
 #include "gps_config.h"
 #include "stdio.h"
 #include "gps_uart.h"
@@ -7,7 +21,7 @@
 #include "app.h"
 /*********define *****************************************************************/
 
-
+/* Const vars ----------------------------------------------------------------*/  
 const char *OK = "OK";
 const char *t = "[{%22fields%22:{%22latitude%22:39.262477,%22longitude%22:-1.913166},%22timestamp%22:1599911115},{%22fields%22:{%22latitude%22:39.262477,%22longitude%22:-1.913166},%22timestamp%22:1599911115},{%22fields%22:{%22latitude%22:39.262477,%22longitude%22:-1.913166},%22timestamp%22:1599911116}]";
 //const char *UGNSINF0 = "+CGNSINF: 1,0";
@@ -17,10 +31,12 @@ const char *t = "[{%22fields%22:{%22latitude%22:39.262477,%22longitude%22:-1.913
 
 
 /*********private functions prototype***********************************************************/
-uint8_t gps_config_test_mode (void);
+uint8_t     gps_config_test_mode        (void);
+
 /*********public functions prototype***********************************************************/
-void gps_config_init_module (void);
-void gps_config_ON_OFF_module(void);
+
+void        gps_config_init_module      (void);
+void        gps_config_ON_OFF_module    (void);
 
 /*********private variables***********************************************************/
 gps_config_lv gps_config_v =
@@ -33,6 +49,12 @@ gps_config_lv gps_config_v =
 
 };
 
+/**
+ * @brief gps config init module. Initialize vars, configure PORTS of microcontroller
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void gps_config_init_module (void)
 {
 	// clear buff rx and tx
@@ -55,8 +77,12 @@ void gps_config_init_module (void)
     gps_config_v.test_mode = gps_config_test_mode();
     
 }
-
-//Encender modulo SIMCom
+/**
+ * @brief gps config ON/OFF module. Power ON/OFF simCom module
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void gps_config_ON_OFF_module(void)  
 {   
    PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_13, 1);//secuencia para arrancar el modulo mediante PWKEY
@@ -64,6 +90,12 @@ void gps_config_ON_OFF_module(void)
    PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_13, 0);
 }
 
+/**
+ * @brief gps config test mode. Get if program is in test mode or not
+ * @param[in] none
+ * @param[out]status of test mode 1 true, 0 false
+ * @return none
+ */
 uint8_t gps_config_test_mode (void)
 {
     if(PLIB_PORTS_PinGet(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_1) == 1){
@@ -76,10 +108,15 @@ uint8_t gps_config_test_mode (void)
     
 }
 
+/**
+ * @brief gps config at general. Send comands at to configure general parameter of simCom module
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 
 void gps_config_at_general (void)
 {
-    bool ret= false;
 	switch(gps_config_v.state)
 	{
 		case START_AT_CONFIG:
@@ -145,6 +182,12 @@ void gps_config_at_general (void)
 	
 }
 
+/**
+ * @brief gps config at gps. Send comands at to configure gps parameter of simCom module
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void gps_config_at_GPS (void)
 {
     switch(gps_config_v.state)
@@ -223,6 +266,12 @@ void gps_config_at_GPS (void)
     }
 }
 
+/**
+ * @brief gps config at GPRS. Send comands at to configure GPRS parameter of simCom module
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void gps_config_at_GRPS (void)
 {
     switch(gps_config_v.state)
@@ -366,6 +415,12 @@ void gps_config_at_GRPS (void)
     }
 }
 
+/**
+ * @brief gps config at HTTP. Send comands at to configure HTTP parameter of simCom module
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void gps_config_at_HTTP(void)
 {
     switch(gps_config_v.state)
@@ -470,6 +525,12 @@ void gps_config_at_HTTP(void)
 
 }
 
+/**
+ * @brief gps config at BLUETOOTH. Send comands at to configure BLUETOOTH parameter of simCom module
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void gps_config_at_BT(void)
 {
     switch(gps_config_v.state)
@@ -561,6 +622,12 @@ void gps_config_at_BT(void)
     }
 }
 
+/**
+ * @brief gps config at GPS REPORTS and SENT data info to web servers.
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void gps_config_at_GPS_reports (void)
 {
     switch(gps_config_v.state)
