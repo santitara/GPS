@@ -18,6 +18,8 @@
 #include "gps_common.h"
 #include "gps_config.h"
 #include "time.h"
+
+#define MAX_ERRORS_CONSECUTIVES 5
 /* Const vars ----------------------------------------------------------------*/    
 const char *ERR = "ERROR";
 const char *UGNSINF0 = "+CGNSINF: 1,0";
@@ -161,7 +163,8 @@ bool gps_uart_process_response(uint8_t *buff, const char *check_msg)
 void gps_uart_rx_state (void)
 {
     char* ret = 0;
-    static count_tout;
+    static count_tout = 0;
+    static err_count = 0;
     //ret = strstr(buff,check_msg); 
     if(gps_uart_v.flag_rx_end)
     {
@@ -240,14 +243,21 @@ void gps_uart_rx_state (void)
                 //gps_config_v.state = ASK_COVERAGE;
                 led_control_v.module_status_bit.web_state_bit = 0;
             }
-            //else
-            //{
-                gps_config_v.state = gps_config_v.state_wrong;
-            //}
-            
+            err_count++;
+            gps_config_v.state = gps_config_v.state_wrong;
             gps_uart_v.flag_rx_end = 0;
             gps_uart_v.index=0;
-            memset(gps_uart_v.rx_buffer,1,255);
+            memset(gps_uart_v.rx_buffer,1,BUFF_SIZE_RX);
+            if(err_count > MAX_ERRORS_CONSECUTIVES && gps_config_v.state >= SET_GPS_REPORT)
+            {
+                err_count = 0;
+                gps_config_v.state = IDLE;
+                memset(gps_uart_v.rx_buffer,1,BUFF_SIZE_RX);
+                memset(gps_uart_v.data_frame_tx,0,SIZE_BUF_DATA_TX);
+                gps_uart_v.flag_rx_end = 0;
+                gps_uart_v.index=0;
+                gps_config_v.flag_gps_report = 0;
+            }
         }
         else if(gps_uart_process_response(gps_uart_v.rx_buffer,CREG_OK))
         {

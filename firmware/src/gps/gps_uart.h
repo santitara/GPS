@@ -33,7 +33,7 @@ extern "C" {
 /* Definitions ---------------------------------------------------------------*/    
 #define BUFF_SIZE_RX        255
 #define MSG_TO_SEND         15
-#define SIZE_BUF_DATA_TX    1700
+#define SIZE_BUF_DATA_TX    1800
  
 /* Public enum ---------------------------------------------------------------*/
 
