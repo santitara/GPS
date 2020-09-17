@@ -64,7 +64,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "app.h"
 #include "system_definitions.h"
 #include "gps/gps_uart.h"
-#include "gps/gps_common.h"
+#include "gps/gps_config.h"
+
 #define OFF_DELAY_LED 14
 //extern tick_scaler_sirena;
 // *****************************************************************************
@@ -74,17 +75,21 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 //                      TIMERS 
 // ****************************************************************************
+
 void led_blink(uint8_t num_blink);
+/**
+ * @brief timer 1 interrupt each 10 ms
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer para gestionar la entrada de comandos por botones +,- y D
 {
     //tick of timer is aproximately 10 ms/tick
     static uint8_t ms_10 = 0;
     static uint8_t ms_100 = 0; 
     static uint8_t ms_1000 = 0;
-    static uint8_t state_led = 1;
     static uint8_t ms_blink = 0;
-    static uint8_t t_off = 0;
-    static uint8_t t_on = 0;
     static uint8_t ms_gps_report = 0;
     ms_10++;
     //increase up to 100ms
@@ -95,7 +100,7 @@ void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer p
         ms_blink++;
         ms_gps_report++;
        
-        if(ms_gps_report >= 10)
+        if(ms_gps_report >= GPS_REPORTS_FREQ)
         {
             gps_config_v.flag_gps_report = 1;
             ms_gps_report = 0;
@@ -103,7 +108,7 @@ void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer p
         
         if(ms_blink == 2)
         {
-            led_blink(gps_config_v.num_blink);
+            led_blink(led_control_v.num_blink);
             ms_blink = 0;
         }
         
@@ -122,11 +127,11 @@ void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer p
     {
         ms_1000++;
         ms_100 = 0;
-        gps_config_v.tout++;
-        if(gps_config_v.tout>=5)
+        gps_config_v.counter_tout++;
+        if(gps_config_v.counter_tout>=GPS_COMMS_TOUT)
         {
             gps_config_v.flag_timeout = 1;
-            gps_config_v.tout = 0;
+            gps_config_v.counter_tout = 0;
         }
         
     }
@@ -140,6 +145,12 @@ void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer p
   PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_2);
 }
 
+/**
+ * @brief led blinc funtion, to manage number of blinks of led status
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void led_blink( uint8_t num_blink)
 {
     static uint8_t state_led = 1;
@@ -189,13 +200,15 @@ void __ISR(_TIMER_4_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance0(void)          
 //                      UART'S
 // ****************************************************************************
 const char *OKs="OK\r\n";
+
+/**
+ * @brief UART 2   interrupt each time that receive a data byte
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
  void __ISR(_UART_2_VECTOR, ipl2AUTO) _IntHandlerDrvUsartInstance0(void)                //recibe y genera alertas por UART del modulo de comunicaciones
 {
-    static uint8_t index = 0;
-    uint8_t * ptr;
-    //char *ptr_rx[];
-    static uint8_t n_count = 0;
-    static uint8_t r_count = 0;
     if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_2_RECEIVE))
     {
         /* Make sure receive buffer has data availible */

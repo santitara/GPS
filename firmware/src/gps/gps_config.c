@@ -1,4 +1,18 @@
-/*********include headers***********************************************************/
+/**
+ *******************************************************************************
+ * @file gps_config.c
+ * @author slopez
+ * @version 1.0.0
+ * @date Creation: 28/05/2020
+ * @date Last modification: 28/05/2020
+ * @brief gps config.c Cofigure gps simcom module.
+ *******************************************************************************
+
+    @addtogroup GPS CONFIG
+    @{
+
+*/
+/* Includes ------------------------------------------------------------------*/
 #include "gps_config.h"
 #include "stdio.h"
 #include "gps_uart.h"
@@ -7,26 +21,27 @@
 #include "app.h"
 /*********define *****************************************************************/
 
-
+/* Const vars ----------------------------------------------------------------*/  
 const char *OK = "OK";
 const char *t = "[{%22fields%22:{%22latitude%22:39.262477,%22longitude%22:-1.913166},%22timestamp%22:1599911115},{%22fields%22:{%22latitude%22:39.262477,%22longitude%22:-1.913166},%22timestamp%22:1599911115},{%22fields%22:{%22latitude%22:39.262477,%22longitude%22:-1.913166},%22timestamp%22:1599911116}]";
 //const char *UGNSINF0 = "+CGNSINF: 1,0";
 //const char *UGNSINF1 = "+CGNSINF: 1,1";
 /*********private enum***************************************************************/
 
+
+
 /*********private functions prototype***********************************************************/
-uint8_t gps_config_test_mode (void);
+uint8_t     gps_config_test_mode        (void);
+
 /*********public functions prototype***********************************************************/
-void gps_config_init_module (void);
-void gps_config_ON_OFF_module(void);
+
+void        gps_config_init_module      (void);
+void        gps_config_ON_OFF_module    (void);
 
 /*********private variables***********************************************************/
 gps_config_lv gps_config_v =
 {
 	.state = START_AT_CONFIG,
-	.gps_enable = 0,
-	.module_status_bit = 0,
-	.msg_receive = 0,
     .n_retries = 0,
     .flag_get_imei = 0,
     .flag_gps_report = 0,
@@ -34,18 +49,17 @@ gps_config_lv gps_config_v =
 
 };
 
-gps_buff_c_ptr_lv gps_buff_c_ptr_v = 
-{
-    .head = 0,
-    .tail = 0,
-    .max = 0,
-};
-
+/**
+ * @brief gps config init module. Initialize vars, configure PORTS of microcontroller
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void gps_config_init_module (void)
 {
 	// clear buff rx and tx
 	memset(gps_uart_v.rx_buffer,1,BUFF_SIZE_RX);
-	memset(gps_uart_v.tx_buffer,1,BUFF_SIZE_RX);
+	memset(gps_uart_v.data_frame_tx,1,SIZE_BUF_DATA_TX);
     /*stop interrupts*/
     DRV_TMR0_Stop();
     DRV_TMR1_Stop();
@@ -55,16 +69,20 @@ void gps_config_init_module (void)
     
 	//Enalbe led GPS to indicate power on
     PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9,1); 
-    // Set OFF led bluetooth
-    PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_8,0);
+    // Set ON led bluetooth
+    PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_8,1);
     // Set ON converter 5V
     PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_2, 0);
-    
+    gps_config_v.flag_response_moduele_ok = false;
     gps_config_v.test_mode = gps_config_test_mode();
     
 }
-
-//Encender modulo SIMCom
+/**
+ * @brief gps config ON/OFF module. Power ON/OFF simCom module
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void gps_config_ON_OFF_module(void)  
 {   
    PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_13, 1);//secuencia para arrancar el modulo mediante PWKEY
@@ -72,22 +90,33 @@ void gps_config_ON_OFF_module(void)
    PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_13, 0);
 }
 
+/**
+ * @brief gps config test mode. Get if program is in test mode or not
+ * @param[in] none
+ * @param[out]status of test mode 1 true, 0 false
+ * @return none
+ */
 uint8_t gps_config_test_mode (void)
 {
-    if(PLIB_PORTS_PinGet(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_1) == 1){
+    if(PLIB_PORTS_PinGet(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_1) == 1)
+    {
         return 1;
     }
     else
     {
         return 0;
-    }
-    
+    }  
 }
 
+/**
+ * @brief gps config at general. Send comands at to configure general parameter of simCom module
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 
 void gps_config_at_general (void)
 {
-    bool ret= false;
 	switch(gps_config_v.state)
 	{
 		case START_AT_CONFIG:
@@ -106,6 +135,10 @@ void gps_config_at_general (void)
             gps_config_v.expect_res = OK;
 		break;
         case SET_AT_FACTORY:
+            //Set flag to indicate that module had responsed.
+            gps_config_v.flag_response_moduele_ok = true;
+            //Set led off bluetooth to indicate that module had responsed.
+            PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_8,0);
 			// Set msg to send
 			gps_config_v.msg = AT_FACTORY;
 			//send msg
@@ -153,6 +186,12 @@ void gps_config_at_general (void)
 	
 }
 
+/**
+ * @brief gps config at gps. Send comands at to configure gps parameter of simCom module
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void gps_config_at_GPS (void)
 {
     switch(gps_config_v.state)
@@ -231,6 +270,12 @@ void gps_config_at_GPS (void)
     }
 }
 
+/**
+ * @brief gps config at GPRS. Send comands at to configure GPRS parameter of simCom module
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void gps_config_at_GRPS (void)
 {
     switch(gps_config_v.state)
@@ -374,6 +419,12 @@ void gps_config_at_GRPS (void)
     }
 }
 
+/**
+ * @brief gps config at HTTP. Send comands at to configure HTTP parameter of simCom module
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void gps_config_at_HTTP(void)
 {
     switch(gps_config_v.state)
@@ -449,7 +500,7 @@ void gps_config_at_HTTP(void)
            //send msg
            //configure gps_data_post_tx with url 
            gps_uart_prepare_url_post();
-           gps_config_v.msg = gps_data_v.data_post_tx;
+           gps_config_v.msg = gps_uart_v.data_frame_tx;
            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
            //set next state
            gps_config_v.state = NEXT_CONFIG_MODULE;
@@ -463,7 +514,7 @@ void gps_config_at_HTTP(void)
         case NEXT_CONFIG_MODULE:
             appData.state = CONFIG_AT_BT;
             gps_config_v.state = SET_AUTO_PAIR_BT;
-            gps_config_v.module_status_bit.gprs_state_bit = 1;       
+            led_control_v.module_status_bit.gprs_state_bit = 1;       
         break; 
         
         case WAIT_RESPONSE:
@@ -478,6 +529,12 @@ void gps_config_at_HTTP(void)
 
 }
 
+/**
+ * @brief gps config at BLUETOOTH. Send comands at to configure BLUETOOTH parameter of simCom module
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void gps_config_at_BT(void)
 {
     switch(gps_config_v.state)
@@ -540,11 +597,15 @@ void gps_config_at_BT(void)
 		break;
         case SET_NAME_BT:
 			// Set msg to send
-            memset(gps_uart_v.tx_buffer,0,255);
-            strcpy(gps_uart_v.tx_buffer,BTH_CH_NAME);
-            strcat(gps_uart_v.tx_buffer,"1234");//sustituir por imei
-            strcat(gps_uart_v.tx_buffer,"\r\n");
-            gps_config_v.msg = gps_uart_v.tx_buffer;// GPS_REPORT
+            memset(gps_uart_v.data_frame_tx,0,255);
+            strcpy(gps_uart_v.data_frame_tx,BTH_CH_NAME);
+            /*get last 4 digits of imei to show in bt name*/
+            //char *ptr = strtok(gps_uart_v.data.imei,"\0");
+            //const char *IMEI_4DIGIS;
+            //strncpy(IMEI_4DIGIS,gps_uart_v.data.imei[11],4);
+            //strcat(gps_uart_v.data_frame_tx,IMEI_4DIGIS);
+            strcat(gps_uart_v.data_frame_tx,"\r\n");
+            gps_config_v.msg = gps_uart_v.data_frame_tx;// GPS_REPORT
 			//send msg
             while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
             //set next state
@@ -569,6 +630,12 @@ void gps_config_at_BT(void)
     }
 }
 
+/**
+ * @brief gps config at GPS REPORTS and SENT data info to web servers.
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
 void gps_config_at_GPS_reports (void)
 {
     switch(gps_config_v.state)
@@ -597,7 +664,7 @@ void gps_config_at_GPS_reports (void)
 		break;
         case SET_HTTP_FRAME:
             //send msg
-            gps_config_v.msg = gps_data_v.data_frame_tx;// GPS_REPORT;
+            gps_config_v.msg = gps_uart_v.data_frame_tx;// GPS_REPORT;
 			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
             //delay_ms(300);
             //set next state
@@ -617,7 +684,7 @@ void gps_config_at_GPS_reports (void)
 			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
             // Set msg to send data frame
             delay_ms(100);
-            gps_config_v.msg = gps_data_v.data_frame_tx;
+            gps_config_v.msg = gps_uart_v.data_frame_tx;
 			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
