@@ -6,9 +6,8 @@
             <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/src/system_config/default/framework/driver/usart/drv_usart_static.h</file>
             <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/gpsv0.X/nbproject/Makefile-default.mk</file>
             <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/src/gps/gps_config.c</file>
+            <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/src/system_config/default/framework/driver/usart/src/drv_usart_static.c</file>
             <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/src/gps/gps_uart.h</file>
-            <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/src/gps/gps_config.h</file>
-            <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/src/app.h</file>
             <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/src/system_config/default/system_interrupt.c</file>
             <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/src/app.c</file>
             <file>file:/C:/microchip/harmony/v1_07/apps/GPS/firmware/src/gps/gps_uart.c</file>

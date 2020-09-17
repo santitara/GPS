@@ -20,6 +20,7 @@
 #define _GPS_CONFIG_H
 /*********include headers***********************************************************/
 #include "stdint.h"
+#include "stdbool.h"
 /* Provide C++ Compatibility */
 #ifdef __cplusplus
 extern "C" {
@@ -103,6 +104,7 @@ typedef struct
     uint8_t flag_get_imei;
     uint8_t flag_gps_report;
     uint8_t flag_gprs_sent;
+    bool flag_response_moduele_ok;
     http_method_type_e http_method;    
 }gps_config_lv;
 extern gps_config_lv gps_config_v;
