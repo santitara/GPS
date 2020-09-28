@@ -18,7 +18,7 @@
 #include "gps_common.h"
 #include "gps_config.h"
 #include "time.h"
-
+/* Defines  ------------------------------------------------------------------*/  
 #define MAX_ERRORS_CONSECUTIVES 5
 /* Const vars ----------------------------------------------------------------*/    
 const char *ERR = "ERROR";
@@ -62,13 +62,13 @@ const char *VAR_AGIRO ="a_giro=";
 const char *VAR_UD_MED ="ud_med=";
 const char *SEPARATOR= "&";
 const char *URL_TERMINATOR ="\"\r\n";
-//POST
-const char *URL_ST_TRACKER_GRAFANA_POST = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=865067021287761\"\n\r";
-//const char *URL_ST_TRACKER_GRAFANA_POST = "AT+HTTPPARA=\"URL\",\"https://httpbin.org/post\"\n\r";
+
+//URLs
+const char *URL_MISANA = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=";
+const char *URL_RPI = "AT+HTTPPARA=\"URL\",\"79.109.207.104:3658/metrics?imei=";
+const char *URL_LOCATEC = "AT+HTTPPARA=\"URL\",\"https://www.locatec.es/proyectos/manezylozano/ws/getData.php?imei=";
 //GET
-const char *URL_ST_TRACKER_GRAFANA2_1 = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=";
 const char *URL_ST_TRACKER_GRAFANA2_2 ="&payload=";
-const char *URL_LOCATEC = "AT+HTTPPARA=\"URL\",\"https://www.locatec.es/proyectos/manezylozano/ws/getData.php?";
 const char *TRAMA_INI = "[";
 const char *TRAMA_GEO = "{%22fields%22:{%22latitude%22:";
 const char *TRAMA_GEO2 = ",%22longitude%22:";
@@ -79,13 +79,15 @@ const char *TRAMA_TIMESTAMP ="},%22timestamp%22:";
 const char *TRAMA_NEXT = "},";
 const char *TRAMA_END = "}]\"\r\n";
 
-const char *URL_TEST = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=867717038251048&payload=[{%22fields%22:{%22latitude%22:39.262280,%22longitude:%22-1.913421},%22timestamp%22:1598872665},{%22fields%22:{%22latitude%22:39.262280,%22longitude%22:-1.913421},%22timestamp%22:1598872667},{%22fields%22:{%22latitude%22:39.262280,%22longitude%22:-1.913421},%22timestamp%22:1598872669}]\"\r\n";
+//const char *URL_TEST = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=867717038251048&payload=[{%22fields%22:{%22latitude%22:39.262280,%22longitude:%22-1.913421},%22timestamp%22:1598872665},{%22fields%22:{%22latitude%22:39.262280,%22longitude%22:-1.913421},%22timestamp%22:1598872667},{%22fields%22:{%22latitude%22:39.262280,%22longitude%22:-1.913421},%22timestamp%22:1598872669}]\"\r\n";
+
+
 //POST
 const char *TRAMA_INI_POST = "[";
-const char *TRAMA_LAT_POST = "{\"fields\": {\"latitude\":";
+const char *TRAMA_LAT_POST = "{\"latitude\":";
 const char *TRAMA_LON_POST =",\"longitude\":";
 const char *TRAMA_SPEED_POST =",\"speed\":";
-const char *TRAMA_TIMESTAMP_POST ="},\"tags\": {},\"timestamp\":";
+const char *TRAMA_TIMESTAMP_POST =",\"timestamp\":";
 const char *TRAMA_END_POST = "}]";
 /*********private enum***************************************************************/
 
@@ -432,7 +434,7 @@ void gps_uart_prepare_data_frame(void)
         
         if(gps_config_v.http_method == GET)
         {
-            strcpy(gps_uart_v.data_frame_tx,URL_ST_TRACKER_GRAFANA2_1);
+            strcpy(gps_uart_v.data_frame_tx,URL_MISANA);
             strcat(gps_uart_v.data_frame_tx,gps_uart_v.data.imei);
             strcat(gps_uart_v.data_frame_tx,URL_ST_TRACKER_GRAFANA2_2);
             strcat(gps_uart_v.data_frame_tx,TRAMA_INI);
@@ -533,7 +535,13 @@ void gps_uart_prepare_url_post(void)
     //Clean buffer
     memset(gps_uart_v.data_frame_tx,0,SIZE_BUF_DATA_TX);
     //copy url to send post frame
-    strcpy(gps_uart_v.data_frame_tx,URL_ST_TRACKER_GRAFANA2_1);
+    #if SERVER_LOCATION == MISANA
+        strcpy(gps_uart_v.data_frame_tx,URL_MISANA);  
+    #elif SERVER_LOCATION == LOCATEC
+        strcpy(gps_uart_v.data_frame_tx,URL_LOCATEC);
+    #elif SERVER_LOCATION == RASPBERRY
+        strcpy(gps_uart_v.data_frame_tx,URL_RPI); 
+    #endif
     strcat(gps_uart_v.data_frame_tx,gps_uart_v.data.imei);
     strcat(gps_uart_v.data_frame_tx,"\"\r\n");
 }

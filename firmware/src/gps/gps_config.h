@@ -30,6 +30,10 @@ extern "C" {
 #define GPS_REPORTS_FREQ        10  //!in dsec
 #define GPS_COMMS_TOUT          5   //!in sec
 
+#define MISANA                  0
+#define LOCATEC                 1   
+#define RASPBERRY               2
+#define SERVER_LOCATION         MISANA
 /*********public enum***************************************************************/
     
 typedef enum

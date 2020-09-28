@@ -453,7 +453,11 @@ void gps_config_at_HTTP(void)
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
-            gps_config_v.state_ok = SET_CONTENT_TYPE;
+            #if SERVER_LOCATION == LOCATEC
+                gps_config_v.state_ok = SET_SSL_ENABLE;
+            #else
+                gps_config_v.state_ok = SET_CONTENT_TYPE;
+            #endif
             //set wrong state
             gps_config_v.state_wrong = SET_CID_SEL;
             //set msg expected
