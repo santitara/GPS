@@ -19,7 +19,9 @@
 #include "gps_config.h"
 #include "time.h"
 /* Defines  ------------------------------------------------------------------*/  
-#define MAX_ERRORS_CONSECUTIVES 5
+#define MAX_ERRORS_CONSECUTIVES     5
+#define MAX_CONSECUTIVE_ERRORS_TOUT 2
+#define MAX_ERR_COVERAGE            2
 /* Const vars ----------------------------------------------------------------*/    
 const char *ERR = "ERROR";
 const char *UGNSINF0 = "+CGNSINF: 1,0";
@@ -104,6 +106,7 @@ void gps_uart_get_speed             (char *data);
 void gps_uart_prepare_data_frame    (void);
 void gps_uart_process_GNSINF        (void);
 void gps_uart_get_url_post          (void);
+void gps_uart_check_http_res        (void);
 /*********private vars***************************************************************/
 
 /**
@@ -172,7 +175,7 @@ void gps_uart_rx_state (void)
     {
         gps_config_v.counter_tout = 0;
         gps_config_v.flag_timeout = 0;
-        if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_RES))
+        /*if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_RES))
         {
             if(gps_config_v.http_method == GET)
             {
@@ -194,9 +197,10 @@ void gps_uart_rx_state (void)
                 else
                 {
                     led_control_v.module_status_bit.web_state_bit = 0;
+                    gps_config_v.state = ASK_COVERAGE;
                 }
             }
-        }
+        }*/
         if (gps_uart_process_response(gps_uart_v.rx_buffer,UGNSINF0))
         {
             gps_config_v.state = gps_config_v.state_ok;
@@ -204,10 +208,12 @@ void gps_uart_rx_state (void)
             gps_uart_v.index=0;
             gps_uart_v.ptr = strstr(gps_uart_v.rx_buffer,UGNSINF0);
             led_control_v.module_status_bit.gps_state_bit = 0;
-            if(gps_uart_v.ptr != NULL)
+           /* if(gps_uart_v.ptr != NULL)
             {
                 gps_uart_process_GNSINF();
-            }
+            }*/
+            /*check msg response of http*/
+            gps_uart_check_http_res();
             memset(gps_uart_v.rx_buffer,1,255);
         }
         else if (gps_uart_process_response(gps_uart_v.rx_buffer,UGNSINF1))
@@ -223,6 +229,8 @@ void gps_uart_rx_state (void)
             {
                 gps_uart_process_GNSINF();
             }
+            /*check msg response of http*/
+            gps_uart_check_http_res();
             memset(gps_uart_v.rx_buffer,1,255);
         }
         else if(gps_uart_process_response(gps_uart_v.rx_buffer,"OK"))
@@ -232,6 +240,12 @@ void gps_uart_rx_state (void)
             {
                 strncpy(gps_uart_v.data.imei,&gps_uart_v.rx_buffer[2],15);
                 gps_config_v.flag_get_imei = 0;
+            }
+            /*check if state is one of send packet to confirm that packet*/
+            if(gps_config_v.state >=  SET_HTTP_FRAME && gps_config_v.state <= SEND_HTTP_FRAME)
+            {
+                //Set gprs status
+                led_control_v.module_status_bit.gprs_state_bit = 1;
             }
             gps_config_v.state = gps_config_v.state_ok;
             gps_uart_v.flag_rx_end = 0;
@@ -244,6 +258,14 @@ void gps_uart_rx_state (void)
             {
                 //gps_config_v.state = ASK_COVERAGE;
                 led_control_v.module_status_bit.web_state_bit = 0;
+            }
+            if(gps_config_v.prev_state == SET_GPS_REPORT)
+            {
+                led_control_v.module_status_bit.gps_state_bit = 0;
+            }
+            if(gps_config_v.prev_state >=  SET_HTTP_FRAME && gps_config_v.prev_state <= SEND_HTTP_FRAME)
+            {
+                led_control_v.module_status_bit.gprs_state_bit = 0;
             }
             err_count++;
             gps_config_v.state = gps_config_v.state_wrong;
@@ -260,6 +282,14 @@ void gps_uart_rx_state (void)
                 gps_uart_v.index=0;
                 gps_config_v.flag_gps_report = 0;
             }
+            else if(err_count >MAX_ERRORS_CONSECUTIVES)
+            {
+                if(gps_config_v.state != START_AT_CONFIG)
+                {
+                    gps_config_v.state = gps_config_v.state - 1;
+                }
+                err_count = 0;
+            }
         }
         else if(gps_uart_process_response(gps_uart_v.rx_buffer,CREG_OK))
         {
@@ -267,6 +297,7 @@ void gps_uart_rx_state (void)
             gps_uart_v.flag_rx_end = 0;
             gps_uart_v.index=0;
             memset(gps_uart_v.rx_buffer,1,255);
+            led_control_v.module_status_bit.gprs_state_bit = 1;
         }
         else if(gps_uart_process_response(gps_uart_v.rx_buffer,CREG_NOK))
         {
@@ -274,6 +305,7 @@ void gps_uart_rx_state (void)
             gps_uart_v.flag_rx_end = 0;
             gps_uart_v.index=0;
             memset(gps_uart_v.rx_buffer,1,255);
+            led_control_v.module_status_bit.gprs_state_bit = 0;
         }
         else
         {
@@ -299,6 +331,15 @@ void gps_uart_rx_state (void)
             gps_config_v.state = gps_config_v.state_wrong;
             gps_config_v.counter_tout = 0;
             gps_config_v.flag_timeout = 0;
+            gps_config_v.consecutive_errors_tout++;
+            if(gps_config_v.consecutive_errors_tout>=MAX_CONSECUTIVE_ERRORS_TOUT)
+            {
+                if(gps_config_v.state != START_AT_CONFIG)
+                {
+                    gps_config_v.state = gps_config_v.state - 1;
+                }
+                gps_config_v.consecutive_errors_tout = 0;;
+            }
         }
     }
 
@@ -478,10 +519,12 @@ void gps_uart_prepare_data_frame(void)
         if(gps_config_v.http_method == GET)
         {
             strcat(gps_uart_v.data_frame_tx,TRAMA_END);
+            gps_config_v.state = SET_HTTP_FRAME;
         }
         else //POST
         {
             strcat(gps_uart_v.data_frame_tx,TRAMA_END_POST);
+            gps_config_v.state = SET_HTTP_DATA_POST;
         }
         gps_uart_v.data.msg_num = 0;
     }
@@ -544,5 +587,40 @@ void gps_uart_prepare_url_post(void)
     #endif
     strcat(gps_uart_v.data_frame_tx,gps_uart_v.data.imei);
     strcat(gps_uart_v.data_frame_tx,"\"\r\n");
+}
+
+void gps_uart_check_http_res(void)
+{
+    static uint8_t count_err_coverage = 0;
+    if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_RES))
+    {
+        if(gps_config_v.http_method == GET)
+        {
+            if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_OK_GET))
+            {
+                led_control_v.module_status_bit.web_state_bit = 1;
+            }
+            else
+            {
+                led_control_v.module_status_bit.web_state_bit = 0;
+            }
+        }
+        else    //POST
+        {
+            if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_OK_POST))
+            {
+                led_control_v.module_status_bit.web_state_bit = 1;
+            }
+            else
+            {
+                led_control_v.module_status_bit.web_state_bit = 0;
+                count_err_coverage++;
+                if(count_err_coverage >= MAX_ERR_COVERAGE)
+                {
+                    gps_config_v.state = ASK_COVERAGE;
+                }
+            }
+        }
+    }   
 }
 

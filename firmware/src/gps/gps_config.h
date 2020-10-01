@@ -28,12 +28,12 @@ extern "C" {
 
 /*********define *****************************************************************/
 #define GPS_REPORTS_FREQ        10  //!in dsec
-#define GPS_COMMS_TOUT          5   //!in sec
+#define GPS_COMMS_TOUT          3   //!in sec
 
 #define MISANA                  0
 #define LOCATEC                 1   
 #define RASPBERRY               2
-#define SERVER_LOCATION         MISANA
+#define SERVER_LOCATION         RASPBERRY
 /*********public enum***************************************************************/
     
 typedef enum
@@ -46,7 +46,7 @@ typedef enum
     SET_BAUDRATE,
     //gps config states
     SET_GPS_ON,
-    SET_ANT_GPS_ON,
+    //SET_ANT_GPS_ON,
     SET_ECHO_OFF,
     SET_GET_IMEI,
     //gprs config states
@@ -98,6 +98,7 @@ typedef struct
     gps_conf_states_e state;
     gps_conf_states_e state_ok;
     gps_conf_states_e state_wrong;
+    gps_conf_states_e prev_state;
 	const char *msg;
     const char *expect_res;
     uint8_t n_retries;
@@ -109,7 +110,8 @@ typedef struct
     uint8_t flag_gps_report;
     uint8_t flag_gprs_sent;
     bool flag_response_moduele_ok;
-    http_method_type_e http_method;    
+    http_method_type_e http_method;
+    uint8_t consecutive_errors_tout;
 }gps_config_lv;
 extern gps_config_lv gps_config_v;
 
