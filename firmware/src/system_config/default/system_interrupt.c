@@ -91,6 +91,7 @@ void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer p
     static uint8_t ms_1000 = 0;
     static uint8_t ms_blink = 0;
     static uint8_t ms_gps_report = 0;
+    static uint8_t ms_bt_sent = 0;
     ms_10++;
     //increase up to 100ms
     if(ms_10 == 10)
@@ -99,13 +100,17 @@ void __ISR(_TIMER_2_VECTOR, ipl1AUTO) _IntHandlerDrvTmrInstance1(void) //timer p
         ms_10=0;
         ms_blink++;
         ms_gps_report++;
-       
+        ms_bt_sent++;
         if(ms_gps_report >= GPS_REPORTS_FREQ)
         {
             gps_config_v.flag_gps_report = 1;
             ms_gps_report = 0;
         }
-        
+        if(ms_bt_sent >= BT_SENT_FREQ)
+        {
+            gps_config_v.flag_bt_sent = 1;
+            ms_bt_sent = 0;
+        }
         if(ms_blink == 2)
         {
             led_blink(led_control_v.num_blink);

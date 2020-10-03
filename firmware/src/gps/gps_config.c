@@ -643,6 +643,9 @@ void gps_config_at_BT(void)
  */
 void gps_config_at_GPS_reports (void)
 {
+    char term=0x1A;
+    char buff_bt[50];
+    const char *prueba = "hola mundo";
     switch(gps_config_v.state)
 	{
         case SET_GPS_REPORT:
@@ -768,6 +771,42 @@ void gps_config_at_GPS_reports (void)
             //set msg expected
             gps_config_v.expect_res = OK;
 		break;
+        case SET_SSP_BLUETOOTH:
+            //send msg
+            gps_config_v.msg = BTH_SSP;
+            //send msg
+            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
+            //set next state
+            gps_config_v.state = WAIT_RESPONSE;//WAIT_RESPONSE;
+            //set state ok
+            gps_config_v.state_ok = IDLE;         
+            //set wrong state
+            gps_config_v.state_wrong = IDLE;
+            //set msg expected
+            gps_config_v.expect_res = OK;     
+        break;
+        case SET_MSG_BLUETOOTH:
+            
+            //send msg
+            gps_config_v.msg = BTH_SEND;
+            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
+            //send data
+            delay_ms(10);
+            //strcpy(buff_bt,prueba);
+            gps_config_v.msg = gps_uart_v.bt_frame_tx;
+			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
+            gps_config_v.msg = &term;
+            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
+            //set next state
+            //delay_ms(100);
+            gps_config_v.state = WAIT_RESPONSE;//WAIT_RESPONSE;
+            //set state ok
+            gps_config_v.state_ok = IDLE;         
+            //set wrong state
+            gps_config_v.state_wrong = IDLE;
+            //set msg expected
+            gps_config_v.expect_res = OK;     
+        break;
         case WAIT_RESPONSE:
 			gps_uart_rx_state ();
 		break;
@@ -777,6 +816,19 @@ void gps_config_at_GPS_reports (void)
                 gps_config_v.flag_gprs_sent = 0;    
                 gps_config_v.state = SET_GPS_REPORT;
                 gps_config_v.flag_gps_report = 0;
+            }
+            else if(gps_config_v.flag_bt_sent)
+            {
+                
+                if(led_control_v.module_status_bit.bt_state_bit)
+                {
+                    gps_config_v.state = SET_MSG_BLUETOOTH;
+                }
+                gps_config_v.flag_bt_sent = 0;
+            }
+            if(gps_config_v.flag_tronic)
+            {
+                
             }
             else
             {

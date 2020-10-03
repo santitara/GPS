@@ -29,6 +29,7 @@ extern "C" {
 /*********define *****************************************************************/
 #define GPS_REPORTS_FREQ        10  //!in dsec
 #define GPS_COMMS_TOUT          3   //!in sec
+#define BT_SENT_FREQ            20  //!in dsec
 
 #define MISANA                  0
 #define LOCATEC                 1   
@@ -79,6 +80,8 @@ typedef enum
     SEND_HTTP_FRAME,
     SET_HTTP_READ,
     ASK_COVERAGE,
+    SET_SSP_BLUETOOTH,
+    SET_MSG_BLUETOOTH,
             
     IDLE,
     NEXT_CONFIG_MODULE,        
@@ -109,6 +112,9 @@ typedef struct
     uint8_t flag_get_imei;
     uint8_t flag_gps_report;
     uint8_t flag_gprs_sent;
+    uint8_t flag_bt_sent;
+    uint8_t flag_tronic;
+    uint8_t flag_confg_bt;
     bool flag_response_moduele_ok;
     http_method_type_e http_method;
     uint8_t consecutive_errors_tout;
