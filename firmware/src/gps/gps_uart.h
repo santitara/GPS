@@ -57,7 +57,8 @@ typedef struct
 typedef struct
 {
     char rx_buffer[BUFF_SIZE_RX];
-    char data_frame_tx[SIZE_BUF_DATA_TX]; //<!
+    char data_frame_tx[SIZE_BUF_DATA_TX];
+    char data_frame_tx_copy[SIZE_BUF_DATA_TX];//<!
     //char url_post_tx[SIZE_BUF_POST_TX];
     char data_gps[BUFF_SIZE_RX];
     uint8_t flag_rx_end; // flag to indicate that msg received is completed

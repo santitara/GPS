@@ -134,6 +134,17 @@ void check_led_status(void)
     {
          led_control_v.num_blink = BLINK_1;
     }
+    if(led_control_v.module_status_bit.bt_state_bit == 1 )
+    {
+        // Set ON led bluetooth
+        PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_8,1);
+    }
+    else
+    {
+         // Set OFF led bluetooth
+        PLIB_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_8,0);
+    }
+        
 }
 /*******************************************************************************
  End of File
