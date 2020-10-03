@@ -46,6 +46,7 @@ gps_config_lv gps_config_v =
     .flag_get_imei = 0,
     .flag_gps_report = 0,
     .http_method = POST,
+    .consecutive_errors_tout = 0,
 
 };
 
@@ -179,7 +180,7 @@ void gps_config_at_general (void)
 		break;
 
 		default:
-
+            appData.state = CONFIG_AT_MODULE;
 		break;
 
 	}
@@ -265,7 +266,7 @@ void gps_config_at_GPS (void)
             gps_uart_rx_state ();
 		break;
         default:
-            
+            appData.state = CONFIG_AT_MODULE;
         break;
     }
 }
@@ -414,7 +415,7 @@ void gps_config_at_GRPS (void)
             gps_uart_rx_state ();
 		break;
         default:
-            
+            appData.state = CONFIG_AT_GPS;
         break;
     }
 }
@@ -453,7 +454,11 @@ void gps_config_at_HTTP(void)
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
-            gps_config_v.state_ok = SET_CONTENT_TYPE;
+            #if SERVER_LOCATION == LOCATEC
+                gps_config_v.state_ok = SET_SSL_ENABLE;
+            #else
+                gps_config_v.state_ok = SET_CONTENT_TYPE;
+            #endif
             //set wrong state
             gps_config_v.state_wrong = SET_CID_SEL;
             //set msg expected
@@ -521,7 +526,7 @@ void gps_config_at_HTTP(void)
             gps_uart_rx_state ();
 		break;
         default:
-            
+            appData.state = CONFIG_AT_GPRS;
         break;
         
         
@@ -625,7 +630,7 @@ void gps_config_at_BT(void)
             gps_uart_rx_state ();
 		break;
         default:
-            
+            appData.state = CONFIG_AT_HTTP;
         break;
     }
 }
@@ -638,9 +643,14 @@ void gps_config_at_BT(void)
  */
 void gps_config_at_GPS_reports (void)
 {
+    char term=0x1A;
+    char buff_bt[50];
+    const char *prueba = "hola mundo";
     switch(gps_config_v.state)
 	{
         case SET_GPS_REPORT:
+            //set previous state
+            gps_config_v.prev_state = gps_config_v.state;
 			// Set msg to send
 			gps_config_v.msg =GPS_INFORM;// GPS_REPORT;
 			//send msg
@@ -650,19 +660,22 @@ void gps_config_at_GPS_reports (void)
             //set state ok
             if(gps_config_v.http_method == GET)
             {
-                gps_config_v.state_ok = SET_HTTP_FRAME;
+                gps_config_v.state_ok = IDLE;
             }
             else
             {
-                gps_config_v.state_ok = SET_HTTP_DATA_POST; 
+                gps_config_v.state_ok = IDLE; 
             }
             //set wrong state
             gps_config_v.state_wrong = SET_GPS_REPORT;
             //set msg expected
             gps_config_v.expect_res = "+CGNSINF";
             
+            
 		break;
         case SET_HTTP_FRAME:
+            //set previous state
+            gps_config_v.prev_state = gps_config_v.state;
             //send msg
             gps_config_v.msg = gps_uart_v.data_frame_tx;// GPS_REPORT;
 			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
@@ -672,11 +685,13 @@ void gps_config_at_GPS_reports (void)
             //set state ok
             gps_config_v.state_ok = SEND_HTTP_FRAME;         
             //set wrong state
-            gps_config_v.state_wrong = SET_GPS_REPORT;
+            gps_config_v.state_wrong = IDLE;
             //set msg expected
             gps_config_v.expect_res = OK;
 		break;
         case SET_HTTP_DATA_POST:
+            //set previous state
+            gps_config_v.prev_state = gps_config_v.state;
             // Set msg to send
 			gps_config_v.msg =GPRS_HTTP_DATA_POST;// GPS_REPORT;
 			//send msg
@@ -691,11 +706,14 @@ void gps_config_at_GPS_reports (void)
             //set state ok
             gps_config_v.state_ok = SEND_HTTP_FRAME;//SET_HTTP_FRAME;
             //set wrong state
-            gps_config_v.state_wrong = SET_HTTP_DATA_POST;
+            gps_config_v.state_wrong = IDLE;
             //set msg expected
             gps_config_v.expect_res = OK;
 		break;
         case SEND_HTTP_FRAME:
+            //set previous state
+            gps_config_v.prev_state = gps_config_v.state;
+            
             gps_config_v.flag_gprs_sent = 1;
             // Set msg to send
             if(gps_config_v.http_method == GET)
@@ -719,6 +737,8 @@ void gps_config_at_GPS_reports (void)
             gps_config_v.expect_res = "+HTTPACTION";
 		break;
         case SET_HTTP_READ: //not used
+            //set previous state
+            gps_config_v.prev_state = gps_config_v.state;
 			// Set msg to send
 			gps_config_v.msg =GPRS_HTTP_READ;// GPS_REPORT;
 			//send msg
@@ -736,6 +756,8 @@ void gps_config_at_GPS_reports (void)
             
 		break;
         case ASK_COVERAGE: //not used
+            //set previous state
+            gps_config_v.prev_state = gps_config_v.state;
 			// Set msg to send
 			gps_config_v.msg = AT_CREG;
 			//send msg
@@ -749,6 +771,42 @@ void gps_config_at_GPS_reports (void)
             //set msg expected
             gps_config_v.expect_res = OK;
 		break;
+        case SET_SSP_BLUETOOTH:
+            //send msg
+            gps_config_v.msg = BTH_SSP;
+            //send msg
+            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
+            //set next state
+            gps_config_v.state = WAIT_RESPONSE;//WAIT_RESPONSE;
+            //set state ok
+            gps_config_v.state_ok = IDLE;         
+            //set wrong state
+            gps_config_v.state_wrong = IDLE;
+            //set msg expected
+            gps_config_v.expect_res = OK;     
+        break;
+        case SET_MSG_BLUETOOTH:
+            
+            //send msg
+            gps_config_v.msg = BTH_SEND;
+            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
+            //send data
+            delay_ms(10);
+            //strcpy(buff_bt,prueba);
+            gps_config_v.msg = gps_uart_v.bt_frame_tx;
+			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
+            gps_config_v.msg = &term;
+            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
+            //set next state
+            //delay_ms(100);
+            gps_config_v.state = WAIT_RESPONSE;//WAIT_RESPONSE;
+            //set state ok
+            gps_config_v.state_ok = IDLE;         
+            //set wrong state
+            gps_config_v.state_wrong = IDLE;
+            //set msg expected
+            gps_config_v.expect_res = OK;     
+        break;
         case WAIT_RESPONSE:
 			gps_uart_rx_state ();
 		break;
@@ -759,13 +817,28 @@ void gps_config_at_GPS_reports (void)
                 gps_config_v.state = SET_GPS_REPORT;
                 gps_config_v.flag_gps_report = 0;
             }
+            else if(gps_config_v.flag_bt_sent)
+            {
+                
+                if(led_control_v.module_status_bit.bt_state_bit)
+                {
+                    gps_config_v.state = SET_MSG_BLUETOOTH;
+                }
+                gps_config_v.flag_bt_sent = 0;
+            }
+            if(gps_config_v.flag_tronic)
+            {
+                
+            }
             else
             {
                 //gps_config_v.state = SET_HTTP_FRAME;
             }
+            //set previous state
+            //gps_config_v.prev_state = gps_config_v.state;
         break;
         default:
-            
+            appData.state = CONFIG_AT_BT;
         break;
     }
 }

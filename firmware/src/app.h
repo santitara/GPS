@@ -28,7 +28,7 @@ extern "C" {
 #include "system_config.h"
 #include "system_definitions.h"
 #include "delay.h"
-
+   
 /* Public definitions ----------------------------------------------------------------------------*/   
 #define LOGO            1   
 #define PRINCIPAL       2 
@@ -52,8 +52,8 @@ extern "C" {
 typedef enum
 {             
     CONFIG_AT_MODULE = 0,
-    CONFIG_AT_GPRS,
     CONFIG_AT_GPS,
+    CONFIG_AT_GPRS,
     CONFIG_AT_HTTP,
     CONFIG_AT_BT,
     CONFIG_AT_END,   
