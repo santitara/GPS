@@ -113,6 +113,7 @@ void gps_uart_process_GNSINF        (void);
 void gps_uart_get_url_post          (void);
 void gps_uart_check_http_res        (void);
 void gps_uart_check_bt_res          (void);
+void gps_uart_prepare_frame_bt      (void);
 /*********private vars***************************************************************/
 
 /**
@@ -235,6 +236,10 @@ void gps_uart_rx_state (void)
             if(gps_uart_v.ptr != NULL)
             {
                 gps_uart_process_GNSINF();
+                if(led_control_v.module_status_bit.bt_state_bit)
+                {
+                    gps_uart_prepare_frame_bt();
+                }
             }
             /*check msg response of http*/
             gps_uart_check_http_res();
@@ -522,7 +527,7 @@ void gps_uart_prepare_data_frame(void)
         strcat(gps_uart_v.data_frame_tx,TRAMA_TIMESTAMP_POST);
         strcat(gps_uart_v.data_frame_tx,gps_uart_v.data.time_stamp); 
     }
-    snprintf(gps_uart_v.data_frame_tx_copy,SIZE_BUF_DATA_TX,"%c%c12.2%c1.5%c5.4%c1238545%c",TRAMA_INI_POST,TRAMA_LAT_POST,
+    snprintf(gps_uart_v.data_frame_tx_copy,SIZE_BUF_DATA_TX,"%s%s12.2%s1.5%s5.4%s1238545%s",TRAMA_INI_POST,TRAMA_LAT_POST,
                                                             TRAMA_LON_POST,TRAMA_SPEED_POST,TRAMA_TIMESTAMP_POST,TRAMA_END_POST);    
     if(gps_uart_v.data.msg_num == MSG_TO_SEND)
     {
@@ -543,7 +548,9 @@ void gps_uart_prepare_data_frame(void)
         strcat(gps_uart_v.data_frame_tx,TRAMA_NEXT);
         gps_uart_v.data.msg_num++;
         gps_config_v.state = IDLE;
-    }  
+    }
+   
+    
 }
 
 /**
@@ -652,5 +659,20 @@ void gps_uart_check_bt_res(void)
         {
             led_control_v.module_status_bit.bt_state_bit = 0;
         }
+}
+
+void gps_uart_prepare_frame_bt(void)
+{
+    //clean buffer
+    memset(gps_uart_v.bt_frame_tx,0,BUFF_SIZE_BT);
+    //fill buffer (lat,long,speed,timpestamp)
+    strcpy(gps_uart_v.bt_frame_tx,gps_uart_v.data.lat_s);
+    strcat(gps_uart_v.bt_frame_tx,",");
+    strcat(gps_uart_v.bt_frame_tx,gps_uart_v.data.lon_s);
+    strcat(gps_uart_v.bt_frame_tx,",");
+    strcat(gps_uart_v.bt_frame_tx,gps_uart_v.data.speed_s);
+    strcat(gps_uart_v.bt_frame_tx,",");
+    strcat(gps_uart_v.bt_frame_tx,gps_uart_v.data.time_stamp);
+    strcat(gps_uart_v.bt_frame_tx,"\n"); 
 }
 

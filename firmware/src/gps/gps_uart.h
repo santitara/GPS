@@ -34,6 +34,7 @@ extern "C" {
 #define BUFF_SIZE_RX        255
 #define MSG_TO_SEND         15
 #define SIZE_BUF_DATA_TX    1800
+#define BUFF_SIZE_BT        255
  
 /* Public enum ---------------------------------------------------------------*/
 
@@ -59,6 +60,7 @@ typedef struct
     char rx_buffer[BUFF_SIZE_RX];
     char data_frame_tx[SIZE_BUF_DATA_TX];
     char data_frame_tx_copy[SIZE_BUF_DATA_TX];//<!
+    char bt_frame_tx[BUFF_SIZE_BT];//<!
     //char url_post_tx[SIZE_BUF_POST_TX];
     char data_gps[BUFF_SIZE_RX];
     uint8_t flag_rx_end; // flag to indicate that msg received is completed

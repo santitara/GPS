@@ -792,8 +792,8 @@ void gps_config_at_GPS_reports (void)
             while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
             //send data
             delay_ms(10);
-            strcpy(buff_bt,prueba);
-            gps_config_v.msg = buff_bt;
+            //strcpy(buff_bt,prueba);
+            gps_config_v.msg = gps_uart_v.bt_frame_tx;
 			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
             gps_config_v.msg = &term;
             while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg)) != true);
