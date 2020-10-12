@@ -100,16 +100,18 @@ const char *TRAMA_END_POST = "}]";
 
 /*********private struct***********************************************************/
 struct tm tm_str;
-gps_uart_t gps_uart_v;
+gps_uart_t gps_uart_v ={
+    .data.index_data = 0,
+};
 
 
 /*********private functions prototype***********************************************************/
-void gps_uart_get_time              (char *date);
-void gps_uart_get_latitude          (char *data);
-void gps_uart_get_longitude         (char *data);
-void gps_uart_get_speed             (char *data);
-void gps_uart_prepare_data_frame    (void);
-void gps_uart_process_GNSINF        (void);
+void gps_uart_get_time              (char *date, uint8_t index);
+void gps_uart_get_latitude          (char *data, uint8_t index);
+void gps_uart_get_longitude         (char *data, uint8_t index);
+void gps_uart_get_speed             (char *data, uint8_t index);
+void gps_uart_prepare_data_frame    (uint8_t index);
+void gps_uart_process_GNSINF        (uint8_t index);
 void gps_uart_get_url_post          (void);
 void gps_uart_check_http_res        (void);
 void gps_uart_check_bt_res          (void);
@@ -182,32 +184,7 @@ void gps_uart_rx_state (void)
     {
         gps_config_v.counter_tout = 0;
         gps_config_v.flag_timeout = 0;
-        /*if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_RES))
-        {
-            if(gps_config_v.http_method == GET)
-            {
-                if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_OK_GET))
-                {
-                    led_control_v.module_status_bit.web_state_bit = 1;
-                }
-                else
-                {
-                    led_control_v.module_status_bit.web_state_bit = 0;
-                }
-            }
-            else    //POST
-            {
-                if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_OK_POST))
-                {
-                    led_control_v.module_status_bit.web_state_bit = 1;
-                }
-                else
-                {
-                    led_control_v.module_status_bit.web_state_bit = 0;
-                    gps_config_v.state = ASK_COVERAGE;
-                }
-            }
-        }*/
+        
         if (gps_uart_process_response(gps_uart_v.rx_buffer,UGNSINF0))
         {
             gps_config_v.state = gps_config_v.state_ok;
@@ -215,9 +192,18 @@ void gps_uart_rx_state (void)
             gps_uart_v.index=0;
             gps_uart_v.ptr = strstr(gps_uart_v.rx_buffer,UGNSINF0);
             led_control_v.module_status_bit.gps_state_bit = 0;
-           /* if(gps_uart_v.ptr != NULL)
+            /*if(gps_uart_v.ptr != NULL)
             {
-                gps_uart_process_GNSINF();
+                gps_uart_process_GNSINF(gps_uart_v.data.index_data);
+                if(gps_uart_v.data.index_data >= MSG_TO_SEND)
+                {
+                    //reset index
+                    gps_uart_v.data.index_data = 0; 
+                }
+                else
+                {
+                    gps_uart_v.data.index_data++;
+                }
             }*/
             /*check msg response of http*/
             gps_uart_check_http_res();
@@ -235,7 +221,16 @@ void gps_uart_rx_state (void)
             gps_uart_v.ptr = strstr(gps_uart_v.rx_buffer,UGNSINF1);
             if(gps_uart_v.ptr != NULL)
             {
-                gps_uart_process_GNSINF();
+                gps_uart_process_GNSINF(gps_uart_v.data.index_data);
+                if(gps_uart_v.data.index_data >= MSG_TO_SEND)
+                {
+                    //reset index
+                    gps_uart_v.data.index_data = 0; 
+                }
+                else
+                {
+                    gps_uart_v.data.index_data++;
+                }
                 if(led_control_v.module_status_bit.bt_state_bit)
                 {
                     gps_uart_prepare_frame_bt();
@@ -367,7 +362,7 @@ void gps_uart_rx_state (void)
  * @param[out]none
  * @return none
  */
-void gps_uart_get_time(char *date)
+void gps_uart_get_time(char *date, uint8_t index)
 {
     char date2[20]={0};
     strncpy(date2,date,4);
@@ -391,8 +386,8 @@ void gps_uart_get_time(char *date)
     tm_str.tm_min=atoi(&date2[14]);
     tm_str.tm_sec=atoi(&date2[17]);
     time_t t = mktime( &tm_str );
-
-    itoa(gps_uart_v.data.time_stamp,t,10);
+    gps_uart_v.data.time_stamp[index] = t;
+    itoa(gps_uart_v.data.time_stamp_s,t,10);
     
 }
 
@@ -403,10 +398,10 @@ void gps_uart_get_time(char *date)
  * @param[out]none
  * @return none
  */
-void gps_uart_get_latitude(char *data)
+void gps_uart_get_latitude(char *data, uint8_t index)
 {
     strcpy(gps_uart_v.data.lat_s,data);
-    gps_uart_v.data.lat = atof(data);
+    gps_uart_v.data.lat[index] = atof(data);
     
 }
 /**
@@ -416,10 +411,10 @@ void gps_uart_get_latitude(char *data)
  * @param[out]none
  * @return none
  */
-void gps_uart_get_longitude(char *data)
+void gps_uart_get_longitude(char *data, uint8_t index)
 {
     strcpy(gps_uart_v.data.lon_s,data);
-    gps_uart_v.data.longi =atof(data);
+    gps_uart_v.data.longi[index] =atof(data);
 }
 
 /**
@@ -429,10 +424,10 @@ void gps_uart_get_longitude(char *data)
  * @param[out]none
  * @return none
  */
-void gps_uart_get_speed(char *data)
+void gps_uart_get_speed(char *data, uint8_t index)
 {
 	strcpy(gps_uart_v.data.speed_s,data);																				  
-    gps_uart_v.data.speed = atof(data);  //version de la velocidad instantanea en coma flotante
+    gps_uart_v.data.speed[index] = atof(data);  //version de la velocidad instantanea en coma flotante
     
     /*if(gps_data_v.speed<0.4)
     {
@@ -473,14 +468,14 @@ void gps_uart_get_speed(char *data)
  * @param[out]none
  * @return none
  */
-void gps_uart_prepare_data_frame(void)
+void gps_uart_prepare_data_frame(uint8_t index)
 {            
     if(led_control_v.module_status_bit.gps_state_bit == 0)
     {  //si el gps no tiene fix preparo los datos 
         strcpy(gps_uart_v.data.lat_s,"0");
         strcpy(gps_uart_v.data.lon_s,"0");
         strcpy(gps_uart_v.data.speed_s,"0");
-        strcpy(gps_uart_v.data.time_stamp,"null");
+        strcpy(gps_uart_v.data.time_stamp_s,"null");
     }
     
     if(gps_uart_v.data.msg_num == 0)
@@ -494,10 +489,10 @@ void gps_uart_prepare_data_frame(void)
             strcat(gps_uart_v.data_frame_tx,URL_ST_TRACKER_GRAFANA2_2);
             strcat(gps_uart_v.data_frame_tx,TRAMA_INI);
         }
-        else //POST
+       /* else //POST
         {
             strcpy(gps_uart_v.data_frame_tx,TRAMA_INI_POST);
-        }
+        }*/
     }
     if(gps_config_v.http_method == GET)
     {
@@ -511,9 +506,9 @@ void gps_uart_prepare_data_frame(void)
         strcat(gps_uart_v.data_frame_tx,gps_uart_v.data.speed_s);
         
         strcat(gps_uart_v.data_frame_tx,TRAMA_TIMESTAMP);
-        strcat(gps_uart_v.data_frame_tx,gps_uart_v.data.time_stamp);
+        strcat(gps_uart_v.data_frame_tx,gps_uart_v.data.time_stamp_s);
     }
-    else
+   /* else
     {
         strcat(gps_uart_v.data_frame_tx,TRAMA_LAT_POST);
         strcat(gps_uart_v.data_frame_tx,gps_uart_v.data.lat_s);
@@ -525,11 +520,18 @@ void gps_uart_prepare_data_frame(void)
         strcat(gps_uart_v.data_frame_tx,gps_uart_v.data.speed_s);
 
         strcat(gps_uart_v.data_frame_tx,TRAMA_TIMESTAMP_POST);
-        strcat(gps_uart_v.data_frame_tx,gps_uart_v.data.time_stamp); 
-    }
-    snprintf(gps_uart_v.data_frame_tx_copy,SIZE_BUF_DATA_TX,"%s%s12.2%s1.5%s5.4%s1238545%s",TRAMA_INI_POST,TRAMA_LAT_POST,
-                                                            TRAMA_LON_POST,TRAMA_SPEED_POST,TRAMA_TIMESTAMP_POST,TRAMA_END_POST);    
-    if(gps_uart_v.data.msg_num == MSG_TO_SEND)
+        strcat(gps_uart_v.data_frame_tx,gps_uart_v.data.time_stamp_s); 
+    }*/
+    
+    /*snprintf(gps_uart_v.data_frame_tx_copy,SIZE_BUF_DATA_TX,"%s%s%f%s%f%s%f%s%lu%s",
+                TRAMA_INI_POST,TRAMA_LAT_POST,gps_uart_v.data.lat[index],
+                TRAMA_LON_POST,gps_uart_v.data.longi[index],
+                TRAMA_SPEED_POST,gps_uart_v.data.speed[index],
+                TRAMA_TIMESTAMP_POST,gps_uart_v.data.time_stamp[index],TRAMA_END_POST);    
+    
+   
+    */
+    if(gps_uart_v.data.msg_num == (MSG_TO_SEND - 1))
     {
         if(gps_config_v.http_method == GET)
         {
@@ -538,14 +540,31 @@ void gps_uart_prepare_data_frame(void)
         }
         else //POST
         {
+            //strcat(gps_uart_v.data_frame_tx,TRAMA_END_POST);
+            //gps_config_v.state = SET_HTTP_DATA_POST;
+            strcpy(gps_uart_v.data_frame_tx,TRAMA_INI_POST);
+            uint8_t i;
+            for(i = 0; i<MSG_TO_SEND; i++)
+            {
+                snprintf(gps_uart_v.data_frame_tx_copy,SIZE_BUF_DATA_TX,"%s%f%s%f%s%f%s%lu",
+                    TRAMA_LAT_POST,gps_uart_v.data.lat[i],
+                    TRAMA_LON_POST,gps_uart_v.data.longi[i],
+                    TRAMA_SPEED_POST,gps_uart_v.data.speed[i],
+                    TRAMA_TIMESTAMP_POST,gps_uart_v.data.time_stamp[i]);
+                strcat(gps_uart_v.data_frame_tx,gps_uart_v.data_frame_tx_copy);
+                if(i < (MSG_TO_SEND-1))
+                {
+                    strcat(gps_uart_v.data_frame_tx,TRAMA_NEXT);
+                }
+            }
             strcat(gps_uart_v.data_frame_tx,TRAMA_END_POST);
-            gps_config_v.state = SET_HTTP_DATA_POST;
         }
+        gps_config_v.state = SET_HTTP_DATA_POST;
         gps_uart_v.data.msg_num = 0;
     }
     else
     {
-        strcat(gps_uart_v.data_frame_tx,TRAMA_NEXT);
+        //strcat(gps_uart_v.data_frame_tx,TRAMA_NEXT);
         gps_uart_v.data.msg_num++;
         gps_config_v.state = IDLE;
     }
@@ -561,7 +580,7 @@ void gps_uart_prepare_data_frame(void)
  * @param[out]none
  * @return none
  */
-void gps_uart_process_GNSINF(void)
+void gps_uart_process_GNSINF(uint8_t index)
 {
     char *ptr_data_gps;
     strncpy(gps_uart_v.data_gps,(gps_uart_v.ptr+14),56); //copio la informacion relevante del gps
@@ -569,19 +588,19 @@ void gps_uart_process_GNSINF(void)
     ptr_data_gps = gps_uart_v.data_gps;
     //get timestamp
     ptr_data_gps = strtok(ptr_data_gps,",");
-    gps_uart_get_time(ptr_data_gps);
+    gps_uart_get_time(ptr_data_gps,index);
     //get latitude 
     ptr_data_gps = strtok(NULL,",");
-    gps_uart_get_latitude(ptr_data_gps);
+    gps_uart_get_latitude(ptr_data_gps,index);
     //get longitude 
     ptr_data_gps = strtok(NULL,",");
-    gps_uart_get_longitude(ptr_data_gps);
+    gps_uart_get_longitude(ptr_data_gps,index);
     //get speed
     ptr_data_gps = strtok(NULL,",");
     ptr_data_gps = strtok(NULL,",");
-    gps_uart_get_speed(ptr_data_gps);
+    gps_uart_get_speed(ptr_data_gps,index);
 
-    gps_uart_prepare_data_frame();
+    gps_uart_prepare_data_frame(index);
 }
 
 /**
@@ -672,7 +691,7 @@ void gps_uart_prepare_frame_bt(void)
     strcat(gps_uart_v.bt_frame_tx,",");
     strcat(gps_uart_v.bt_frame_tx,gps_uart_v.data.speed_s);
     strcat(gps_uart_v.bt_frame_tx,",");
-    strcat(gps_uart_v.bt_frame_tx,gps_uart_v.data.time_stamp);
+    strcat(gps_uart_v.bt_frame_tx,gps_uart_v.data.time_stamp_s);
     strcat(gps_uart_v.bt_frame_tx,"\n"); 
 }
 

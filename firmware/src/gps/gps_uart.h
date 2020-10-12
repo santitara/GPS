@@ -44,15 +44,17 @@ typedef struct
 {
    //uint8_t data_frame_tx[SIZE_BUF_DATA_TX]; //<!
    //uint8_t url_post_tx[SIZE_BUF_POST_TX]; 
-   char time_stamp[10];
-   double lat;
-   double longi;
-   double speed;
+   unsigned long time_stamp[MSG_TO_SEND];
+   char time_stamp_s[10];
+   double lat[MSG_TO_SEND];
+   double longi[MSG_TO_SEND];
+   double speed[MSG_TO_SEND];
    char lat_s[12];
    char lon_s[12];
    char speed_s[12];
    uint8_t msg_num;
-   char imei[20]; 
+   char imei[20];
+   uint8_t index_data;
 }gps_data_lv;
 
 typedef struct
