@@ -16,6 +16,7 @@
 #include "gps_config.h"
 #include "stdio.h"
 #include "gps_uart.h"
+#include "tronic/tronic_uart.h"
 #include "AT_comands.h"
 #include "gps_common.h"
 #include "app.h"
@@ -124,8 +125,8 @@ void gps_config_at_general (void)
 			// Set msg to send
 			gps_config_v.msg = AT;
 			//send msg
-            //while(gps_uart_write()!=true);
-			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+            //while(uart_ops_write()!=true);
+			while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -143,8 +144,8 @@ void gps_config_at_general (void)
 			// Set msg to send
 			gps_config_v.msg = AT_FACTORY;
 			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			//uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -159,8 +160,8 @@ void gps_config_at_general (void)
 			// Set msg to send
 			gps_config_v.msg = BAUDRATE_SEL;
 			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			//uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -201,8 +202,8 @@ void gps_config_at_GPS (void)
 			// Set msg to send
 			gps_config_v.msg = GPS_ON;
 			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
-             while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			//uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+             while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -216,8 +217,8 @@ void gps_config_at_GPS (void)
 			// Set msg to send
 			gps_config_v.msg = ECHO_OFF;
 			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
-             while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			//uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+             while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -232,8 +233,8 @@ void gps_config_at_GPS (void)
 			gps_config_v.msg = GET_IMEI;
             gps_config_v.flag_get_imei = 1;
 			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
-             while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			//uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+             while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -270,8 +271,8 @@ void gps_config_at_GRPS (void)
 			// Set msg to send
 			gps_config_v.msg = HABILITAR_GPRS;
 			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
-             while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			//uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+             while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -285,8 +286,8 @@ void gps_config_at_GRPS (void)
 			// Set msg to send
 			gps_config_v.msg = AT_CREG;
 			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
-             while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			//uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+             while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -300,8 +301,8 @@ void gps_config_at_GRPS (void)
             // Set msg to send
 			gps_config_v.msg = ATTACH_GPRS;
 			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			//uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -315,8 +316,8 @@ void gps_config_at_GRPS (void)
             // Set msg to send
 			gps_config_v.msg = GPRS_RESET_IP;
 			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			//uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -330,8 +331,8 @@ void gps_config_at_GRPS (void)
             // Set msg to send
 			gps_config_v.msg = APN_CON_TYPE;
 			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			//uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -346,8 +347,8 @@ void gps_config_at_GRPS (void)
             // Set msg to send
 			gps_config_v.msg = APN;
 			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			//uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -362,8 +363,8 @@ void gps_config_at_GRPS (void)
             // Set msg to send
 			gps_config_v.msg = OPEN_APN;
 			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			//uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -378,8 +379,8 @@ void gps_config_at_GRPS (void)
             // Set msg to send
 			gps_config_v.msg = QUERY_APN;
 			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			//uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -419,8 +420,8 @@ void gps_config_at_HTTP(void)
 			// Set msg to send
 			gps_config_v.msg = GPRS_HTTP_START;
 			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			//uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -434,8 +435,8 @@ void gps_config_at_HTTP(void)
 			// Set msg to send
 			gps_config_v.msg = CID_SEL;
 			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			//uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -453,8 +454,8 @@ void gps_config_at_HTTP(void)
 			// Set msg to send
 			gps_config_v.msg = SSL_ENABLE;
 			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			//uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -468,8 +469,8 @@ void gps_config_at_HTTP(void)
 			// Set msg to send
 			gps_config_v.msg = URL_CONTENT_TYPE;
 			//send msg
-			//gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg));
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			//uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg));
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -491,7 +492,7 @@ void gps_config_at_HTTP(void)
            //configure gps_data_post_tx with url 
            gps_uart_prepare_url_post();
            gps_config_v.msg = gps_uart_v.data_frame_tx;
-           while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+           while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
            //set next state
            gps_config_v.state = NEXT_CONFIG_MODULE;
            //set state ok
@@ -533,7 +534,7 @@ void gps_config_at_BT(void)
 			// Set msg to send
 			gps_config_v.msg = BTH_AUTO_PAIR;
 			//send msg
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -547,7 +548,7 @@ void gps_config_at_BT(void)
 			// Set msg to send
 			gps_config_v.msg = BTH_ON;
 			//send msg
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -561,7 +562,7 @@ void gps_config_at_BT(void)
 			// Set msg to send
 			gps_config_v.msg = BTH_VIS_ON;
 			//send msg
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -575,7 +576,7 @@ void gps_config_at_BT(void)
 			// Set msg to send
 			gps_config_v.msg = BTH_ONE_CON;
 			//send msg
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -597,7 +598,7 @@ void gps_config_at_BT(void)
             strcat(gps_uart_v.data_frame_tx,"\r\n");
             gps_config_v.msg = gps_uart_v.data_frame_tx;// GPS_REPORT
 			//send msg
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -639,7 +640,7 @@ void gps_config_at_GPS_reports (void)
 			// Set msg to send
 			gps_config_v.msg =GPS_INFORM;// GPS_REPORT;
 			//send msg
-			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -663,7 +664,7 @@ void gps_config_at_GPS_reports (void)
             gps_config_v.prev_state = gps_config_v.state;
             //send msg
             gps_config_v.msg = gps_uart_v.data_frame_tx;// GPS_REPORT;
-			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //delay_ms(300);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;//WAIT_RESPONSE;
@@ -681,11 +682,11 @@ void gps_config_at_GPS_reports (void)
 			gps_config_v.msg =GPRS_HTTP_DATA_POST;// GPS_REPORT;
 			//send msg
             //delay_ms(100);
-			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             // Set msg to send data frame
             delay_ms(100);
             gps_config_v.msg = gps_uart_v.data_frame_tx;
-			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -710,7 +711,7 @@ void gps_config_at_GPS_reports (void)
                 gps_config_v.msg = GPRS_HTTP_ACTION_POST;
             }
             //send msg
-			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             delay_ms(500);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;//WAIT_RESPONSE;
@@ -727,7 +728,7 @@ void gps_config_at_GPS_reports (void)
 			// Set msg to send
 			gps_config_v.msg =GPRS_HTTP_READ;// GPS_REPORT;
 			//send msg
-			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -746,7 +747,7 @@ void gps_config_at_GPS_reports (void)
 			// Set msg to send
 			gps_config_v.msg = AT_CREG;
 			//send msg
-             while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+             while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;
             //set state ok
@@ -760,7 +761,7 @@ void gps_config_at_GPS_reports (void)
             //send msg
             gps_config_v.msg = BTH_SSP;
             //send msg
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE;//WAIT_RESPONSE;
             //set state ok
@@ -774,14 +775,14 @@ void gps_config_at_GPS_reports (void)
             
             //send msg
             gps_config_v.msg = BTH_SEND;
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //send data
             delay_ms(10);
             //strcpy(buff_bt,prueba);
             gps_config_v.msg = gps_uart_v.bt_frame_tx;
-			while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+			while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             gps_config_v.msg = &term;
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
             //set next state
             //delay_ms(100);
             gps_config_v.state = WAIT_RESPONSE;//WAIT_RESPONSE;
@@ -796,13 +797,13 @@ void gps_config_at_GPS_reports (void)
 			gps_uart_rx_state ();
 		break;
         case WAIT_RESPONSE_TRONIC:
-            
+           tronic_uart_rx_state(); 
         break;
         case SET_MSG_TRONIC:
             //send msg
             gps_config_v.msg ="TRONIC";
             //send msg
-            while(gps_uart_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_1) != true);
+            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_1) != true);
             //set next state
             gps_config_v.state = WAIT_RESPONSE_TRONIC;//WAIT_RESPONSE;
             //set state ok

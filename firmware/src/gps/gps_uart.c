@@ -17,6 +17,7 @@
 #include "app.h"
 #include "gps_common.h"
 #include "gps_config.h"
+#include "../uart/uart_ops.h"
 #include "time.h"
 #include <stdio.h>
 /* Defines  ------------------------------------------------------------------*/  
@@ -36,40 +37,7 @@ const char *BTCONNECT = "+BTCONNECT";
 const char *BTDISCONN = "+BTDISCONN";
 const char *BTCONECTING = "+BTCONNECTING:";
 
-//etiquetas del gps
-const char *VAR_DEV ="dev=";
-const char *VAR_LAT ="lat=";
-const char *VAR_LON ="lng=";
-const char *VAR_VEL ="vel=";
-const char *VAR_TS ="ts=";
-//etiquetas de la potencia tronic
-const char *VAR_NPANT="n_pant=";
-//pantalla logo
-const char *VAR_NLOGO ="n_logo=";
- //pantalla principal
-const char *VAR_DEP ="depo=";
-const char *VAR_CAU ="caud=";
-const char *VAR_LUD ="ltr_ud=";
-const char *VAR_EVSI ="ev_si=";
-const char *VAR_EVII ="ev_ii=";
-const char *VAR_EVSD ="ev_sd=";
-const char *VAR_EVID ="ev_id=";
-const char *VAR_EVSI_EN ="ev_si_en=";
-const char *VAR_EVII_EN ="ev_ii_en=";    //averiguar evs y poner 
-const char *VAR_EVSD_EN ="ev_sd_en=";
-const char *VAR_EVID_EN ="ev_id_en=";
-const char *VAR_CAMPO ="campo=";
-const char *VAR_TRAT ="trat=";
-const char *VAR_VEL_TRAT ="vel_trat=";
-const char *VAR_CAU_CAL ="cau_trat=";
-const char *VAR_LUD_TRAT ="ltr_ud_trat=";
-const char *VAR_NMEN ="n_men=";
-const char *VAR_MODO="modo_trab=";
-const char *VAR_AGIRO ="a_giro=";
-const char *VAR_UD_MED ="ud_med=";
-const char *SEPARATOR= "&";
 const char *URL_TERMINATOR ="\"\r\n";
-
 //URLs
 const char *URL_MISANA = "AT+HTTPPARA=\"URL\",\"http://misana-iot.es:1880/api/v2/?token=crjw75yS9gnBsj26uQWEqm9v1vqmMKQ6&id=";
 const char *URL_RPI = "AT+HTTPPARA=\"URL\",\"79.109.207.104:3658/metrics?imei=";
@@ -119,55 +87,6 @@ void gps_uart_prepare_frame_bt      (void);
 /*********private vars***************************************************************/
 
 /**
- * @brief gps uart write. Write bytes in UART port
- * @param[in] char pointer, size of data to send 
- * @return bool var. true when finish false while not send all bytes
- */
-bool gps_uart_write(const char *data, uint8_t size, uint8_t uart)
-{
-    if(*gps_config_v.msg == '\0')
-    {
-        return true;
-    }
-    /* Write a character at a time, only if transmitter is empty */
-    while (PLIB_USART_TransmitterIsEmpty(uart))
-    {
-        /* Send character */
-        PLIB_USART_TransmitterByteSend(uart, *gps_config_v.msg);
-
-        /* Increment to address of next character */
-        gps_config_v.msg++;
-
-        if(*gps_config_v.msg == '\0')
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-/**
- * @brief gps uart process response. Check data received from uart with expected
- * message
- * @param[in] uint8_t *buff. Buffer with data receivd,
- * @param[in ]const char *check_msg, msg to compare buff 
- * @return bool var. true when msg to chec is match, false when not
- */
-bool gps_uart_process_response(uint8_t *buff, const char *check_msg)
-{
-    char* ret = 0;
-    ret = strstr(buff,check_msg);
-    if(ret != NULL)
-    {
-      return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-/**
  * @brief gps uart rx state. Function to process all data info received
  * message
  * @param[in] none
@@ -184,7 +103,7 @@ void gps_uart_rx_state (void)
         gps_config_v.counter_tout = 0;
         gps_config_v.flag_timeout = 0;
         
-        if (gps_uart_process_response(gps_uart_v.rx_buffer,UGNSINF0))
+        if (uart_ops_process_response(gps_uart_v.rx_buffer,UGNSINF0))
         {
             gps_config_v.state = gps_config_v.state_ok;
             gps_uart_v.flag_rx_end = 0;
@@ -209,7 +128,7 @@ void gps_uart_rx_state (void)
             gps_uart_check_bt_res();
             memset(gps_uart_v.rx_buffer,1,255);
         }
-        else if (gps_uart_process_response(gps_uart_v.rx_buffer,UGNSINF1))
+        else if (uart_ops_process_response(gps_uart_v.rx_buffer,UGNSINF1))
         {
             gps_config_v.flag_report_rx =0;
             gps_config_v.state = gps_config_v.state_ok;
@@ -240,7 +159,7 @@ void gps_uart_rx_state (void)
             gps_uart_check_bt_res();
             memset(gps_uart_v.rx_buffer,1,255);
         }
-        else if(gps_uart_process_response(gps_uart_v.rx_buffer,"OK"))
+        else if(uart_ops_process_response(gps_uart_v.rx_buffer,"OK"))
         {
             //get imei data and store
             if(gps_config_v.flag_get_imei == 1)
@@ -259,7 +178,7 @@ void gps_uart_rx_state (void)
             gps_uart_v.index=0;
             memset(gps_uart_v.rx_buffer,1,255);
         }
-        else if(gps_uart_process_response(gps_uart_v.rx_buffer,ERR))
+        else if(uart_ops_process_response(gps_uart_v.rx_buffer,ERR))
         {
             if(gps_config_v.flag_gprs_sent)
             {
@@ -298,7 +217,7 @@ void gps_uart_rx_state (void)
                 err_count = 0;
             }
         }
-        else if(gps_uart_process_response(gps_uart_v.rx_buffer,CREG_OK))
+        else if(uart_ops_process_response(gps_uart_v.rx_buffer,CREG_OK))
         {
             gps_config_v.state = gps_config_v.state_ok;
             gps_uart_v.flag_rx_end = 0;
@@ -306,7 +225,7 @@ void gps_uart_rx_state (void)
             memset(gps_uart_v.rx_buffer,1,255);
             led_control_v.module_status_bit.gprs_state_bit = 1;
         }
-        else if(gps_uart_process_response(gps_uart_v.rx_buffer,CREG_NOK))
+        else if(uart_ops_process_response(gps_uart_v.rx_buffer,CREG_NOK))
         {
             gps_config_v.state = gps_config_v.state_ok;
             gps_uart_v.flag_rx_end = 0;
@@ -353,18 +272,6 @@ void gps_uart_rx_state (void)
 
 }
 
-/**
- * @brief tronic uart rx state. Function to process all data info received
- * message
- * @param[in] none
- * @param[out]none
- * @return none
- */
-void tronic_uart_rx_state (void)
-{
-    
-
-}
 /**
  * @brief gps uart get time. Funtion to convert time of gps module obtained in 
  * timestampo to send to web server
@@ -640,11 +547,11 @@ void gps_uart_prepare_url_post(void)
 void gps_uart_check_http_res(void)
 {
     static uint8_t count_err_coverage = 0;
-    if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_RES))
+    if(uart_ops_process_response(gps_uart_v.rx_buffer,HTTPACTION_RES))
     {
         if(gps_config_v.http_method == GET)
         {
-            if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_OK_GET))
+            if(uart_ops_process_response(gps_uart_v.rx_buffer,HTTPACTION_OK_GET))
             {
                 led_control_v.module_status_bit.web_state_bit = 1;
             }
@@ -655,7 +562,7 @@ void gps_uart_check_http_res(void)
         }
         else    //POST
         {
-            if(gps_uart_process_response(gps_uart_v.rx_buffer,HTTPACTION_OK_POST))
+            if(uart_ops_process_response(gps_uart_v.rx_buffer,HTTPACTION_OK_POST))
             {
                 led_control_v.module_status_bit.web_state_bit = 1;
             }
@@ -674,19 +581,19 @@ void gps_uart_check_http_res(void)
 
 void gps_uart_check_bt_res(void)
 {
-    if(gps_uart_process_response(gps_uart_v.rx_buffer,BTCONECTING))
+    if(uart_ops_process_response(gps_uart_v.rx_buffer,BTCONECTING))
         {
             //led_control_v.module_status_bit.bt_state_bit = 1;
             //gps_config_v.flag_confg_bt = 1;
             gps_config_v.state = SET_SSP_BLUETOOTH;
         }
-        if(gps_uart_process_response(gps_uart_v.rx_buffer,BTCONNECT))
+        if(uart_ops_process_response(gps_uart_v.rx_buffer,BTCONNECT))
         {
             led_control_v.module_status_bit.bt_state_bit = 1;
             //gps_config_v.flag_confg_bt = 1;
             //gps_config_v.state = SET_SSP_BLUETOOTH;
         }
-        if(gps_uart_process_response(gps_uart_v.rx_buffer,BTDISCONN))
+        if(uart_ops_process_response(gps_uart_v.rx_buffer,BTDISCONN))
         {
             led_control_v.module_status_bit.bt_state_bit = 0;
         }

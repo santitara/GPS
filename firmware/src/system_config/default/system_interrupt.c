@@ -65,6 +65,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "system_definitions.h"
 #include "gps/gps_uart.h"
 #include "gps/gps_config.h"
+#include "tronic/tronic_uart.h"
 
 #define OFF_DELAY_LED 14
 //extern tick_scaler_sirena;
@@ -276,30 +277,30 @@ void __ISR(_UART_1_VECTOR, ipl1AUTO) _IntHandlerDrvUsartInstance1(void)
         if (PLIB_USART_ReceiverDataIsAvailable(USART_ID_1))
         {
             /* Get the data from the buffer */
-            gps_uart_v.rx_buffer_tronic[gps_uart_v.index_tronic] = PLIB_USART_ReceiverByteReceive(USART_ID_1);
-            if(gps_uart_v.rx_buffer_tronic[gps_uart_v.index_tronic] == '\n')
+            tronic_uart_v.rx_buffer[tronic_uart_v.index] = PLIB_USART_ReceiverByteReceive(USART_ID_1);
+            if(tronic_uart_v.rx_buffer[tronic_uart_v.index] == '\n')
             {
-                if(gps_uart_v.rx_buffer_tronic[(gps_uart_v.index_tronic)-1] == '\r')
+                if(tronic_uart_v.rx_buffer[(tronic_uart_v.index)-1] == '\r')
                 {
-                    if(gps_uart_v.rx_buffer_tronic[(gps_uart_v.index_tronic)-2] == 'K')
+                    if(tronic_uart_v.rx_buffer[(tronic_uart_v.index)-2] == 'K')
                     {
-                        if(gps_uart_v.rx_buffer_tronic[(gps_uart_v.index_tronic)-3] == 'O')
+                        if(tronic_uart_v.rx_buffer[(tronic_uart_v.index)-3] == 'O')
                         {
-                            gps_uart_v.flag_rx_end_tronic = 1;
+                            tronic_uart_v.flag_rx_end = 1;
                         }
                     }
                     //error case
-                    else if(gps_uart_v.rx_buffer_tronic[(gps_uart_v.index_tronic)-2] == 'R')
+                    else if(tronic_uart_v.rx_buffer[(tronic_uart_v.index)-2] == 'R')
                     {
-                        if(gps_uart_v.rx_buffer_tronic[(gps_uart_v.index_tronic)-3] == 'O')
+                        if(tronic_uart_v.rx_buffer[(tronic_uart_v.index)-3] == 'O')
                         {
-                            if(gps_uart_v.rx_buffer_tronic[(gps_uart_v.index_tronic)-4] == 'R')
+                            if(tronic_uart_v.rx_buffer[(tronic_uart_v.index)-4] == 'R')
                             {
-                                if(gps_uart_v.rx_buffer_tronic[(gps_uart_v.index_tronic)-5] == 'R')
+                                if(tronic_uart_v.rx_buffer[(tronic_uart_v.index)-5] == 'R')
                                 {
-                                    if(gps_uart_v.rx_buffer_tronic[(gps_uart_v.index_tronic)-6] == 'E')
+                                    if(tronic_uart_v.rx_buffer[(tronic_uart_v.index)-6] == 'E')
                                     {
-                                        gps_uart_v.flag_rx_end_tronic = 1;
+                                        tronic_uart_v.flag_rx_end = 1;
                                     }
                                 }
                             }
@@ -307,7 +308,7 @@ void __ISR(_UART_1_VECTOR, ipl1AUTO) _IntHandlerDrvUsartInstance1(void)
                     }
                 }
             }
-            gps_uart_v.index_tronic++;                       
+            tronic_uart_v.index++;                       
         }
         PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_RECEIVE);
     }
