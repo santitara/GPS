@@ -161,7 +161,7 @@ void DRV_USART0_TasksTransmit(void)
     }
 }
 
-void DRV_USART0_TasksReceive(void)
+ void DRV_USART0_TasksReceive(void)
 {
     /* This is the USART Driver Receive tasks routine. If the receive
        interrupt flag is set, the tasks routines are executed.

@@ -28,7 +28,7 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stdint.h"
 #include "stdbool.h" 
-#include "string.h"    
+#include "string.h" 
 
 /* Definitions ---------------------------------------------------------------*/    
 #define BUFF_SIZE_RX        255
@@ -52,31 +52,33 @@ typedef struct
    char lat_s[12];
    char lon_s[12];
    char speed_s[12];
-   uint8_t msg_num;
+   uint8_t msg_num; //! number of msg in post data frame
    char imei[20];
-   uint8_t index_data;
+   uint8_t index_data; //! index of arrays lat, longi, speed to store data each msg
 }gps_data_lv;
 
 typedef struct
 {
-    char rx_buffer[BUFF_SIZE_RX];
+    char rx_buffer[BUFF_SIZE_RX]; //! uart buffer
     char data_frame_tx[SIZE_BUF_DATA_TX];
     char data_frame_tx_copy[SIZE_BUF_DATA_TX];//<!
     char bt_frame_tx[BUFF_SIZE_BT];//<!
-    //char url_post_tx[SIZE_BUF_POST_TX];
-    char data_gps[BUFF_SIZE_RX];
+    char rx_buffer_tronic[BUFF_SIZE_RX];
+    uint8_t flag_rx_end_tronic; // flag to indicate that msg received is completed
     uint8_t flag_rx_end; // flag to indicate that msg received is completed
     uint8_t index; //index of data byte array received
-    char *ptr; // pointer to process data recived
+    uint8_t index_tronic; //index of data byte array received
+    char *ptr; //! pointer to process data recived
     gps_data_lv data;
 }gps_uart_t;
 
 extern gps_uart_t gps_uart_v;;
  
 /* Pubic functions ------------------------------------------------------- */
-bool gps_uart_process_response      ( uint8_t * buff, const char *check_msg );
+bool    gps_uart_process_response   ( uint8_t * buff, const char *check_msg );
 void    gps_uart_rx_state           ( void );
 void    gps_uart_prepare_url_post   ( void );
+bool    gps_uart_write              ( const char *data, uint8_t size, uint8_t uart );
 
     /* Provide C++ Compatibility */
 #ifdef __cplusplus
