@@ -267,10 +267,58 @@ const char *OKs="OK\r\n";
  /*****************************************************************************/      
 void __ISR(_UART_1_VECTOR, ipl1AUTO) _IntHandlerDrvUsartInstance1(void)
 {
-    DRV_USART_TasksTransmit(sysObj.drvUsart1);
+    /*DRV_USART_TasksTransmit(sysObj.drvUsart1);
     DRV_USART_TasksReceive(sysObj.drvUsart1);
-    DRV_USART_TasksError(sysObj.drvUsart1);
-}            
+    DRV_USART_TasksError(sysObj.drvUsart1);*/
+    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_RECEIVE))
+    {
+        /* Make sure receive buffer has data availible */
+        if (PLIB_USART_ReceiverDataIsAvailable(USART_ID_1))
+        {
+            /* Get the data from the buffer */
+            gps_uart_v.rx_buffer_tronic[gps_uart_v.index_tronic] = PLIB_USART_ReceiverByteReceive(USART_ID_1);
+            if(gps_uart_v.rx_buffer_tronic[gps_uart_v.index_tronic] == '\n')
+            {
+                if(gps_uart_v.rx_buffer_tronic[(gps_uart_v.index_tronic)-1] == '\r')
+                {
+                    if(gps_uart_v.rx_buffer_tronic[(gps_uart_v.index_tronic)-2] == 'K')
+                    {
+                        if(gps_uart_v.rx_buffer_tronic[(gps_uart_v.index_tronic)-3] == 'O')
+                        {
+                            gps_uart_v.flag_rx_end_tronic = 1;
+                        }
+                    }
+                    //error case
+                    else if(gps_uart_v.rx_buffer_tronic[(gps_uart_v.index_tronic)-2] == 'R')
+                    {
+                        if(gps_uart_v.rx_buffer_tronic[(gps_uart_v.index_tronic)-3] == 'O')
+                        {
+                            if(gps_uart_v.rx_buffer_tronic[(gps_uart_v.index_tronic)-4] == 'R')
+                            {
+                                if(gps_uart_v.rx_buffer_tronic[(gps_uart_v.index_tronic)-5] == 'R')
+                                {
+                                    if(gps_uart_v.rx_buffer_tronic[(gps_uart_v.index_tronic)-6] == 'E')
+                                    {
+                                        gps_uart_v.flag_rx_end_tronic = 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            gps_uart_v.index_tronic++;                       
+        }
+        PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_RECEIVE);
+    }
+    else if (PLIB_INT_SourceFlagGet(INT_ID_0,INT_SOURCE_USART_1_TRANSMIT))
+    {
+        PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_USART_1_TRANSMIT);
+    }
+    
+    PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_USART_1_ERROR);
+    
+}  
 // ****************************************************************************
 //                     SPI
 // ****************************************************************************

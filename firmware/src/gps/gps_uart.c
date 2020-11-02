@@ -123,17 +123,17 @@ void gps_uart_prepare_frame_bt      (void);
  * @param[in] char pointer, size of data to send 
  * @return bool var. true when finish false while not send all bytes
  */
-bool gps_uart_write(char *data, uint8_t size)
+bool gps_uart_write(const char *data, uint8_t size, uint8_t uart)
 {
     if(*gps_config_v.msg == '\0')
     {
         return true;
     }
     /* Write a character at a time, only if transmitter is empty */
-    while (PLIB_USART_TransmitterIsEmpty(USART_ID_2))
+    while (PLIB_USART_TransmitterIsEmpty(uart))
     {
         /* Send character */
-        PLIB_USART_TransmitterByteSend(USART_ID_2, *gps_config_v.msg);
+        PLIB_USART_TransmitterByteSend(uart, *gps_config_v.msg);
 
         /* Increment to address of next character */
         gps_config_v.msg++;
@@ -176,7 +176,6 @@ bool gps_uart_process_response(uint8_t *buff, const char *check_msg)
  */
 void gps_uart_rx_state (void)
 {
-    char* ret = 0;
     static count_tout = 0;
     static err_count = 0;
     //ret = strstr(buff,check_msg); 
@@ -354,6 +353,18 @@ void gps_uart_rx_state (void)
 
 }
 
+/**
+ * @brief tronic uart rx state. Function to process all data info received
+ * message
+ * @param[in] none
+ * @param[out]none
+ * @return none
+ */
+void tronic_uart_rx_state (void)
+{
+    
+
+}
 /**
  * @brief gps uart get time. Funtion to convert time of gps module obtained in 
  * timestampo to send to web server
@@ -583,9 +594,10 @@ void gps_uart_prepare_data_frame(uint8_t index)
 void gps_uart_process_GNSINF(uint8_t index)
 {
     char *ptr_data_gps;
-    strncpy(gps_uart_v.data_gps,(gps_uart_v.ptr+14),56); //copio la informacion relevante del gps
+    char data_gps[BUFF_SIZE_RX];
+    strncpy(data_gps,(gps_uart_v.ptr+14),56); //copio la informacion relevante del gps
     //copy data pointer
-    ptr_data_gps = gps_uart_v.data_gps;
+    ptr_data_gps = data_gps;
     //get timestamp
     ptr_data_gps = strtok(ptr_data_gps,",");
     gps_uart_get_time(ptr_data_gps,index);

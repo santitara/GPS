@@ -36,7 +36,27 @@ extern "C" {
 #define RASPBERRY               2
 #define SERVER_LOCATION         RASPBERRY
 /*********public enum***************************************************************/
-    
+
+typedef enum{   
+    LOGO = 1,               
+    PRINCIPAL,       
+    MENU,            
+    CALCULO,         
+    AGENDA,          
+    AJ_FABRICA,      
+    AJ_USUARIO,      
+    ESTADISTICAS,   
+    INSTALACION,      
+    CALCULADORA,     
+    AVERIAS,        
+    INFO,            
+    LLENAR_DEP,      
+    MEDIDAS,        
+    TECLADO,         
+    PIN,             
+    RESUMEN,         
+}e_Screens;
+
 typedef enum
 {
 	//geranal config states
@@ -82,12 +102,21 @@ typedef enum
     ASK_COVERAGE,
     SET_SSP_BLUETOOTH,
     SET_MSG_BLUETOOTH,
+    SET_MSG_TRONIC,
+    WAIT_RESPONSE_TRONIC,
+            
             
     IDLE,
     NEXT_CONFIG_MODULE,        
     WAIT_RESPONSE,
 }gps_conf_states_e;
 
+typedef enum
+{
+    GPS_REPORT_SUB = 0,
+    TRONIC_REPORT_SUB,
+    BT_REPORT_SUB
+}gps_conf_sub_states_e;
 typedef enum
 {
     GET = 0,
@@ -102,7 +131,8 @@ typedef struct
     gps_conf_states_e state_ok;
     gps_conf_states_e state_wrong;
     gps_conf_states_e prev_state;
-	const char *msg;
+	gps_conf_sub_states_e sub_state;
+    const char *msg;
     const char *expect_res;
     uint8_t n_retries;
     uint8_t test_mode;

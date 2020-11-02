@@ -29,25 +29,7 @@ extern "C" {
 #include "system_definitions.h"
 #include "delay.h"
    
-/* Public definitions ----------------------------------------------------------------------------*/   
-#define LOGO            1   
-#define PRINCIPAL       2 
-#define MENU            3
-#define CALCULO         4
-#define AGENDA          5
-#define AJ_FABRICA      6
-#define AJ_USUARIO      7
-#define ESTADISTICAS    8
-#define INSTALACION     9
-#define CALCULADORA     10
-#define AVERIAS         11
-#define INFO            12
-#define LLENAR_DEP      13
-#define MEDIDAS         14
-#define TECLADO         15
-#define PIN             16
-#define RESUMEN         17
-
+/* Public definitions ----------------------------------------------------------------------------*/ 
 /* Public enum ---------------------------------------------------------------*/
 typedef enum
 {             
