@@ -32,40 +32,41 @@ extern "C" {
 #include "uart/uart_ops.h"
 
 /* Definitions ---------------------------------------------------------------*/    
- 
+#define SIZE_DATA_TRONIC        10
 /* Public enum ---------------------------------------------------------------*/
 
 /* Public struct -------------------------------------------------------------*/
-const char *VAR_DEP ="depo=";
-const char *VAR_CAU ="caud=";
-const char *VAR_LUD ="ltr_ud=";
-const char *VAR_EVSI ="ev_si=";
-const char *VAR_EVII ="ev_ii=";
-const char *VAR_EVSD ="ev_sd=";
-const char *VAR_EVID ="ev_id=";
-const char *VAR_EVSI_EN ="ev_si_en=";
-const char *VAR_EVII_EN ="ev_ii_en=";    //averiguar evs y poner 
-const char *VAR_EVSD_EN ="ev_sd_en=";
-const char *VAR_EVID_EN ="ev_id_en=";
-const char *VAR_CAMPO ="campo=";
-const char *VAR_TRAT ="trat=";
-const char *VAR_VEL_TRAT ="vel_trat=";
-const char *VAR_CAU_CAL ="cau_trat=";
-const char *VAR_LUD_TRAT ="ltr_ud_trat=";
-const char *VAR_NMEN ="n_men=";
-const char *VAR_MODO="modo_trab=";
-const char *VAR_AGIRO ="a_giro=";
-const char *VAR_UD_MED ="ud_med=";
 
 typedef struct
 {
-    
-};
+    char depo   [SIZE_DATA_TRONIC];
+    char cau    [SIZE_DATA_TRONIC];
+    char lud    [SIZE_DATA_TRONIC];
+    char evsi   [SIZE_DATA_TRONIC];
+    char evii   [SIZE_DATA_TRONIC];
+    char evsd   [SIZE_DATA_TRONIC];
+    char evid   [SIZE_DATA_TRONIC];
+    char evsi_en[SIZE_DATA_TRONIC];
+    char evii_en[SIZE_DATA_TRONIC];
+    char evsd_en[SIZE_DATA_TRONIC];
+    char evid_en[SIZE_DATA_TRONIC];
+    char campo  [SIZE_DATA_TRONIC];
+    char trat   [SIZE_DATA_TRONIC];
+    char vel_trat[SIZE_DATA_TRONIC];
+    char cau_cal[SIZE_DATA_TRONIC];
+    char lud_tart[SIZE_DATA_TRONIC];
+    char nmen   [SIZE_DATA_TRONIC];
+    char modo   [SIZE_DATA_TRONIC];
+    char agiro  [SIZE_DATA_TRONIC];
+    char ud_med [SIZE_DATA_TRONIC];
+}data_s;
+
 typedef struct
 {
     char rx_buffer[BUFF_SIZE_RX];
     uint8_t flag_rx_end; // flag to indicate that msg received is completed
     uint8_t index; //index of data byte array received
+    data_s data;
 }tronic_uart_t;
 
 extern tronic_uart_t tronic_uart_v;;

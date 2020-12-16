@@ -50,10 +50,20 @@ const char *VAR_LUD_TRAT ="ltr_ud_trat=";
 const char *VAR_NMEN ="n_men=";
 const char *VAR_MODO="modo_trab=";
 const char *VAR_AGIRO ="a_giro=";
-const char *VAR_UD_MED ="ud_med=";
+const  char *VAR_UD_MED ="ud_med=";
 const char *SEPARATOR= "&";
 
-
+/* data frame uart example, all filed separates by "," */
+/*
+ * |   HEADER   | DATA 1  | DATA 2  | DATA 3  | DATA 4  | DATA 5  | DATA 6  | DATA 7  | DATA 8  | DATA 9  | DATA 10 |
+ *  ----------------------------------------------------------------------------------------------------------------
+ * |   TRONIC   |DEPOSITO | CAUDAL  | LITROS_U|  EVSI   |  EVII   |  EVSD   |  EVID   | EVSI_EN | EVSII_EN| EVSD_EN |
+ * -----------------------------------------------------------------------------------------------------------------
+ * |            | DATA 11 | DATA 12 | DATA 13 | DATA 14 | DATA 15 | DATA 16 | DATA 17 | DATA 18 | DATA 19 | DATA 20 |
+ * -----------------------------------------------------------------------------------------------------------------
+ * |            | EVID_EN | CAMPO   |  TRAT   | VEL_TRAT| CAU_CAL | LUD_TRAT|  NMEN   |   MODO  |  AGIRO  | UD_MED  |
+ * -----------------------------------------------------------------------------------------------------------------
+ */
 /*********private enum***************************************************************/
 
 /*********private struct***********************************************************/
@@ -132,30 +142,106 @@ void tronic_uart_get_info(char *data)
 {
     char *p_buff;
     char buff_aux[BUFF_SIZE_RX];
-    
+    uint8_t n = 0;
     strncpy(buff_aux,data,BUFF_SIZE_RX);
     //copy data pointer
     p_buff = buff_aux;
     //first is header TRONIC and discart
     p_buff = strtok(p_buff,",");
-    //get 
+
+    while (p_buff != NULL)
+    {
+        p_buff = strtok (NULL, ",");
+        strcopy(tronic_uart_v.data.depo+(n*SIZE_DATA_TRONIC),p_buff);
+        n++;
+    }
+#if 0
+    //get depo 
     p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.depo,p_buff);
+
+    //get cau
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.cau,p_buff);
+
+    //get lud 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.lud,p_buff);
+
+    //get evsi 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.evsi,p_buff);
+
+    //get evii 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.evii,p_buff);
+
+    //get evsd 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.evsd,p_buff);
+
+    //get evid 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.evid,p_buff);
+
+    //get evsi_en 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.evsi_en,p_buff);
+
+    //get evii_en 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.evii_en,p_buff);
+
+    //get evsd_en 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.evsd_en,p_buff);
+
+    //get evid_en 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.evid_en,p_buff);
+
+    //get campo 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.campo,p_buff);
+
+    //get trat 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.trat,p_buff);
+
+    //get vel_trat 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.vel_trat,p_buff);
+
+    //get cau_cal 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.cau_cal,p_buff);
+
+    //get lud_tart 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.lud_tart,p_buff);
+
+    //get nmen 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.nmen,p_buff);
     
-    /*
-     //get timestamp
-    ptr_data_gps = strtok(ptr_data_gps,",");
-    gps_uart_get_time(ptr_data_gps,index);
-    //get latitude 
-    ptr_data_gps = strtok(NULL,",");
-    gps_uart_get_latitude(ptr_data_gps,index);
-    //get longitude 
-    ptr_data_gps = strtok(NULL,",");
-    gps_uart_get_longitude(ptr_data_gps,index);
-    //get speed
-    ptr_data_gps = strtok(NULL,",");
-    ptr_data_gps = strtok(NULL,",");
-    gps_uart_get_speed(ptr_data_gps,index);*/
-    
+    //get modo 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.modo,p_buff);
+
+    //get agiro 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.agiro,p_buff);
+
+    //get ud_med 
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.ud_med,p_buff);
+#endif
 }
 
-void tronic
+void tronic_uart_get_data ()
+{
+   
+    p_buff = strtok(NULL,",");
+    strcopy(tronic_uart_v.data.depo,p_buff);
+    
+}

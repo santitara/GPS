@@ -631,7 +631,6 @@ void gps_config_at_GPS_reports (void)
 {
     char term=0x1A;
     char buff_bt[50];
-    const char *prueba = "hola mundo";
     switch(gps_config_v.state)
 	{
         case SET_GPS_REPORT:
