@@ -20,6 +20,7 @@
 #include "../uart/uart_ops.h"
 #include "time.h"
 #include <stdio.h>
+#include <string.h>
 /* Defines  ------------------------------------------------------------------*/  
 #define MAX_ERRORS_CONSECUTIVES     5
 #define MAX_CONSECUTIVE_ERRORS_TOUT 2
@@ -69,7 +70,7 @@ const char *SEPARATOR= "&";
 /*********private struct***********************************************************/
 tronic_uart_t tronic_uart_v;
 /*********private functions prototype***********************************************************/
-
+void tronic_uart_get_info(char *data);
 /*********private vars***************************************************************/
 
 /**
@@ -98,6 +99,7 @@ void tronic_uart_rx_state (void)
             tronic_uart_get_info(tronic_uart_v.rx_buffer);
             
         }
+        //cambiar el string esperado... segun se desee
         else if (uart_ops_process_response(tronic_uart_v.rx_buffer,TRONIC))
         {
            
@@ -148,100 +150,85 @@ void tronic_uart_get_info(char *data)
     p_buff = buff_aux;
     //first is header TRONIC and discart
     p_buff = strtok(p_buff,",");
-
-    while (p_buff != NULL)
-    {
-        p_buff = strtok (NULL, ",");
-        strcopy(tronic_uart_v.data.depo+(n*SIZE_DATA_TRONIC),p_buff);
-        n++;
-    }
-#if 0
     //get depo 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.depo,p_buff);
+    strcpy(tronic_uart_v.data.depo,p_buff);
 
     //get cau
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.cau,p_buff);
+    strcpy(tronic_uart_v.data.cau,p_buff);
 
     //get lud 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.lud,p_buff);
+    strcpy(tronic_uart_v.data.lud,p_buff);
 
     //get evsi 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.evsi,p_buff);
+    strcpy(tronic_uart_v.data.evsi,p_buff);
 
     //get evii 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.evii,p_buff);
+    strcpy(tronic_uart_v.data.evii,p_buff);
 
     //get evsd 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.evsd,p_buff);
+    strcpy(tronic_uart_v.data.evsd,p_buff);
 
     //get evid 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.evid,p_buff);
+    strcpy(tronic_uart_v.data.evid,p_buff);
 
     //get evsi_en 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.evsi_en,p_buff);
+    strcpy(tronic_uart_v.data.evsi_en,p_buff);
 
     //get evii_en 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.evii_en,p_buff);
+    strcpy(tronic_uart_v.data.evii_en,p_buff);
 
     //get evsd_en 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.evsd_en,p_buff);
+    strcpy(tronic_uart_v.data.evsd_en,p_buff);
 
     //get evid_en 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.evid_en,p_buff);
+    strcpy(tronic_uart_v.data.evid_en,p_buff);
 
     //get campo 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.campo,p_buff);
+    strcpy(tronic_uart_v.data.campo,p_buff);
 
     //get trat 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.trat,p_buff);
+    strcpy(tronic_uart_v.data.trat,p_buff);
 
     //get vel_trat 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.vel_trat,p_buff);
+    strcpy(tronic_uart_v.data.vel_trat,p_buff);
 
     //get cau_cal 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.cau_cal,p_buff);
+    strcpy(tronic_uart_v.data.cau_cal,p_buff);
 
     //get lud_tart 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.lud_tart,p_buff);
+    strcpy(tronic_uart_v.data.lud_tart,p_buff);
 
     //get nmen 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.nmen,p_buff);
+    strcpy(tronic_uart_v.data.nmen,p_buff);
     
     //get modo 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.modo,p_buff);
+    strcpy(tronic_uart_v.data.modo,p_buff);
 
     //get agiro 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.agiro,p_buff);
+    strcpy(tronic_uart_v.data.agiro,p_buff);
 
     //get ud_med 
     p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.ud_med,p_buff);
-#endif
+    strcpy(tronic_uart_v.data.ud_med,p_buff);
+
 }
 
-void tronic_uart_get_data ()
-{
-   
-    p_buff = strtok(NULL,",");
-    strcopy(tronic_uart_v.data.depo,p_buff);
-    
-}

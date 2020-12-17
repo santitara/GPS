@@ -206,6 +206,12 @@
         <itemPath>../src/gps/gps_config.c</itemPath>
         <itemPath>../src/gps/gps_uart.c</itemPath>
       </logicalFolder>
+      <logicalFolder name="tronic" displayName="tronic" projectFiles="true">
+        <itemPath>../src/tronic/tronic_uart.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="uart" displayName="uart" projectFiles="true">
+        <itemPath>../src/uart/uart_ops.c</itemPath>
+      </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

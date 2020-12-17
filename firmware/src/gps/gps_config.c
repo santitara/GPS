@@ -772,21 +772,34 @@ void gps_config_at_GPS_reports (void)
         break;
         case SET_MSG_BLUETOOTH:
             
+            
             //send msg
-            gps_config_v.msg = BTH_SEND;
-            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
-            //send data
-            delay_ms(10);
-            //strcpy(buff_bt,prueba);
-            gps_config_v.msg = gps_uart_v.bt_frame_tx;
-			while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
-            gps_config_v.msg = &term;
-            while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
-            //set next state
-            //delay_ms(100);
-            gps_config_v.state = WAIT_RESPONSE;//WAIT_RESPONSE;
-            //set state ok
-            gps_config_v.state_ok = IDLE;         
+            //protejo si el buffer es nulo ya que sino se queda abierta la uart de bt  y n envia.
+            if(gps_uart_v.bt_frame_tx[0] != '\0')
+            {
+                gps_config_v.msg = BTH_SEND;
+                while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+                //send data
+                delay_ms(10);
+                //strcpy(buff_bt,prueba);
+                gps_config_v.msg = gps_uart_v.bt_frame_tx;
+                while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+                gps_config_v.msg = &term;
+                while(uart_ops_write(gps_config_v.msg, sizeof(gps_config_v.msg),USART_ID_2) != true);
+           
+                //set next state);
+                gps_config_v.state = WAIT_RESPONSE;//WAIT_RESPONSE;
+                //set state ok
+                gps_config_v.state_ok = IDLE;
+            }
+            else
+            {
+                //set next state);
+                gps_config_v.state = IDLE;//WAIT_RESPONSE;
+                //set state ok
+                gps_config_v.state_ok = IDLE; 
+                
+            }
             //set wrong state
             gps_config_v.state_wrong = IDLE;
             //set msg expected
@@ -813,6 +826,32 @@ void gps_config_at_GPS_reports (void)
             gps_config_v.expect_res = OK;    
         break;    
         case IDLE:
+            
+        if(gps_config_v.flag_gps_report)
+            {
+                gps_config_v.flag_gprs_sent = 0;    
+                gps_config_v.state = SET_GPS_REPORT;
+                gps_config_v.flag_gps_report = 0;
+            }
+            else if(gps_config_v.flag_bt_sent)
+            {
+                
+                if(led_control_v.module_status_bit.bt_state_bit)
+                {
+                    gps_config_v.state = SET_MSG_BLUETOOTH;
+                }
+                gps_config_v.flag_bt_sent = 0;
+            }
+            if(gps_config_v.flag_tronic)
+            {
+                
+            }
+            else
+            {
+                //gps_config_v.state = SET_HTTP_FRAME;
+            }
+    
+        #if 0
             if(gps_config_v.flag_gps_report && gps_config_v.sub_state == GPS_REPORT_SUB)
             {
                 gps_config_v.flag_gprs_sent = 0;
@@ -838,6 +877,7 @@ void gps_config_at_GPS_reports (void)
             {
                 //nothing to do;
             }
+        #endif
         break;
         default:
             appData.state = CONFIG_AT_BT;

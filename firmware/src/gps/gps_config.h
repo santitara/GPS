@@ -34,7 +34,7 @@ extern "C" {
 #define MISANA                  0
 #define LOCATEC                 1   
 #define RASPBERRY               2
-#define SERVER_LOCATION         RASPBERRY
+#define SERVER_LOCATION         MISANA
 /*********public enum***************************************************************/
 
 typedef enum{   
